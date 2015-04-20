@@ -27,15 +27,12 @@ from tornado.options import define, options
 
 ## Some constant info
 import movieNameInventory as Inv 
-Movies = ["divergent", "toy story 2", "hunger game", "INTERSTELLAR"]
+import constantModule as CM
 Movies = Inv.getMovieNames()
-print Movies
 IDs = [] # collect return ids. Note: will be more than Movies list (e.g. will get two returns for divergent)
 Movie_dict = {} # key is movie ID, value is a dict of the movie search return
 Review_dict = {} # key is the movie ID
-MovieSearch = "http://api.rottentomatoes.com/api/public/v1.0/movies.json?apikey=x6usx7bn33cdn9vverg9f2v7&q="
-ReviewSearch = "http://api.rottentomatoes.com/api/public/v1.0/movies/#ID HERE#/reviews.json?apikey=x6usx7bn33cdn9vverg9f2v7&review_type=all&page_limit=50"
-RelationSearch = "http://api.rottentomatoes.com/api/public/v1.0/movies/#ID HERE#/similar.json?apikey=x6usx7bn33cdn9vverg9f2v7"
+
 
 
 def _load_json_from_url(url):
@@ -60,7 +57,7 @@ def _load_json_from_url(url):
 def tomatoMovieSearch():
 	global Movies, IDs, Movie_dict, Review_dict
 	for movie in Movies:
-		toFetch = MovieSearch + movie.replace(" ", "%20")
+		toFetch = CM.MovieSearch(movie)
 		print bcolors.OKGREEN + "Fetching: " + toFetch + bcolors.ENDC
 		data = _load_json_from_url(toFetch)		
 		
@@ -70,14 +67,7 @@ def tomatoMovieSearch():
 				Movie_dict[data['movies'][i]['id']] = data['movies'][i]
 			except:
 				pass
-		time.sleep(0.5)
-		# for i in range(data['total']):
-		# 	IDs.append(data['movies'][i]['id'])
-		# 	Movie_dict[data['movies'][i]['id']] = data['movies'][i]
-		# print "fetching: " + toFetch
-		# http_client = AsyncHTTPClient()
-		# response = yield http_client.fetch(toFetch)
-		# data = eval(response.body)
+		time.sleep(0.5) #tomato server will not happy if you fetch too fast
 
 @gen.coroutine
 def tomatoReviewSeach():
@@ -85,23 +75,20 @@ def tomatoReviewSeach():
 	
 	for myid in IDs:
 		pageNum=1
-		toFetch = "http://api.rottentomatoes.com/api/public/v1.0/movies/%s/reviews.json?apikey=x6usx7bn33cdn9vverg9f2v7&page_limit=50&review_type=all&page=%s" %(myid,pageNum)
-		# print toFetch
+		toFetch = CM.ReviewSearch(myid,pageNum)		
 		data = _load_json_from_url(toFetch)		
-		time.sleep(1)				
-		print bcolors.OKGREEN + "MovieID: " + str(myid) + "\t" + "Title: " + Movie_dict[myid]['title'] + "\t" + "Total Reviews: " + str(data['total']) + bcolors.ENDC
+		time.sleep(1)		
+		print bcolors.OKGREEN + "MovieID:\t%s\tTitle:\t%s\tTotal Reviews:\t%d" %(myid, Movie_dict[myid]['title'], data['total']) + bcolors.ENDC		
 		
 		#API only provide 50 reviews per page, so fetching more pages if total review is more than 50
 		if(data['total']>50):
 			loop = int((data['total']+49)/50)-1
 			for i in range(loop):
-				pageNum+=1
-				toFetch = "http://api.rottentomatoes.com/api/public/v1.0/movies/%s/reviews.json?apikey=x6usx7bn33cdn9vverg9f2v7&page_limit=50&review_type=all&page=%s" %(myid,pageNum)				
+				pageNum+=1				
+				toFetch = CM.ReviewSearch(myid,pageNum)		
 				new_data= _load_json_from_url(toFetch)
-				data['reviews'].extend(new_data['reviews'])				
-				# print data.keys()				
-				# print len(data['reviews'])
-				time.sleep(0.5)		
+				data['reviews'].extend(new_data['reviews'])								
+				time.sleep(0.5)	#tomato server will not happy if you fetch too fast
 		
 		Review_dict[myid] = data
 				
