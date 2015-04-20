@@ -1,1 +1,1 @@
-from distributed_table import DisTable
+from fs import DisTable
