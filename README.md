@@ -2,7 +2,8 @@
 Building up movie seach engine plus customized recommendation system
 
 #tomatoCrawler
-![alt tag](./constant/tomatoCrawler.png)
+![alt tag](./constants/tomatoCrawler.png)
+
 Will fetch rotten tomato website and save the following pickles:
 ./constants/Movie_dict and ./constants/Review_dict
 Now we have:
