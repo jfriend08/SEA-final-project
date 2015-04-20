@@ -1,1 +1,1 @@
-from fs import DisTable
+from fs import DisTable, DisList
