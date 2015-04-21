@@ -105,13 +105,13 @@ class DisTable(object):
   '''
   Pop data of this key
   param key - The position of data to be removed and returned
-  returns - AnyType, whatever value stored with key
+  returns - AnyType, whatever value stored with key, None if there's no such value
   '''
   def pop(self, key):
     try:
       return self.data.pop(key)
     except KeyError:
-      pass
+      return None
 
   '''
   Determine if table already has this key
