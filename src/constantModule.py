@@ -3,11 +3,11 @@ ReviewSearch_base = "http://api.rottentomatoes.com/api/public/v1.0/movies/%s/rev
 RelationSearch_base = "http://api.rottentomatoes.com/api/public/v1.0/movies/#ID HERE#/similar.json?apikey=x6usx7bn33cdn9vverg9f2v7"
 
 def MovieSearch(movietitle):
-	tofetch = MovieSearch_base + movietitle.replace(" ", "%20")
-	return tofetch
+  tofetch = MovieSearch_base + movietitle.replace(" ", "%20")
+  return tofetch
 
 
 
 def ReviewSearch(movieID, pagenume):
-	tofetch = ReviewSearch_base %(movieID,pagenume)
-	return tofetch
+  tofetch = ReviewSearch_base %(movieID,pagenume)
+  return tofetch
