@@ -55,76 +55,76 @@ def _load_json_from_url(url):
 
 @gen.coroutine
 def tomatoMovieSearch():
-	global Movies, IDs, Movie_dict, Review_dict
-	for movie in Movies:
-		toFetch = CM.MovieSearch(movie)
-		print bcolors.OKGREEN + "Fetching: " + toFetch + bcolors.ENDC
-		data = _load_json_from_url(toFetch)		
-		
-		for i in range(data['total']):
-			try:
-				IDs.append(data['movies'][i]['id'])
-				Movie_dict[data['movies'][i]['id']] = data['movies'][i]
-			except:
-				pass
-		time.sleep(0.5) #tomato server will not happy if you fetch too fast
+  global Movies, IDs, Movie_dict, Review_dict
+  for movie in Movies:
+    toFetch = CM.MovieSearch(movie)
+    print bcolors.OKGREEN + "Fetching: " + toFetch + bcolors.ENDC
+    data = _load_json_from_url(toFetch)   
+    
+    for i in range(data['total']):
+      try:
+        IDs.append(data['movies'][i]['id'])
+        Movie_dict[data['movies'][i]['id']] = data['movies'][i]
+      except:
+        pass
+    time.sleep(0.5) #tomato server will not happy if you fetch too fast
 
 @gen.coroutine
 def tomatoReviewSeach():
-	global Movies, IDs, Movie_dict, Review_dict	
-	
-	for myid in IDs:
-		pageNum=1
-		toFetch = CM.ReviewSearch(myid,pageNum)		
-		data = _load_json_from_url(toFetch)		
-		time.sleep(1)		
-		print bcolors.OKGREEN + "MovieID:\t%s\tTitle:\t%s\tTotal Reviews:\t%d" %(myid, Movie_dict[myid]['title'], data['total']) + bcolors.ENDC		
-		
-		#API only provide 50 reviews per page, so fetching more pages if total review is more than 50
-		if(data['total']>50):
-			loop = int((data['total']+49)/50)-1
-			for i in range(loop):
-				pageNum+=1				
-				toFetch = CM.ReviewSearch(myid,pageNum)		
-				new_data= _load_json_from_url(toFetch)
-				data['reviews'].extend(new_data['reviews'])								
-				time.sleep(0.5)	#tomato server will not happy if you fetch too fast
-		
-		Review_dict[myid] = data
-				
-		
-		
+  global Movies, IDs, Movie_dict, Review_dict 
+  
+  for myid in IDs:
+    pageNum=1
+    toFetch = CM.ReviewSearch(myid,pageNum)   
+    data = _load_json_from_url(toFetch)   
+    time.sleep(1)   
+    print bcolors.OKGREEN + "MovieID:\t%s\tTitle:\t%s\tTotal Reviews:\t%d" %(myid, Movie_dict[myid]['title'], data['total']) + bcolors.ENDC   
+    
+    #API only provide 50 reviews per page, so fetching more pages if total review is more than 50
+    if(data['total']>50):
+      loop = int((data['total']+49)/50)-1
+      for i in range(loop):
+        pageNum+=1        
+        toFetch = CM.ReviewSearch(myid,pageNum)   
+        new_data= _load_json_from_url(toFetch)
+        data['reviews'].extend(new_data['reviews'])               
+        time.sleep(0.5) #tomato server will not happy if you fetch too fast
+    
+    Review_dict[myid] = data
+        
+    
+    
 
 
 if __name__ == "__main__":        
-	import color
-	bcolors = color.bcolors()
+  import color
+  bcolors = color.bcolors()
 
-	print bcolors.HEADER + "====== START: tomatoMovieSearch ======" + bcolors.ENDC
-	tornado.ioloop.IOLoop.current().run_sync(tomatoMovieSearch)
-	print bcolors.OKBLUE + "Number of IDs: " +  str(len(IDs)) + bcolors.ENDC	
+  print bcolors.HEADER + "====== START: tomatoMovieSearch ======" + bcolors.ENDC
+  tornado.ioloop.IOLoop.current().run_sync(tomatoMovieSearch)
+  print bcolors.OKBLUE + "Number of IDs: " +  str(len(IDs)) + bcolors.ENDC  
 
-	# for myid in IDs:
-	# 	print "myid: " + myid 		
-	# for key in Movie_dict.keys():
-	# 	print str(key) + "\t" + Movie_dict[key]['title'] + "\n" + Movie_dict[key]['synopsis']
-	
-	print bcolors.HEADER + "====== START: tomatoReviewSeach ======" + bcolors.ENDC
-	tornado.ioloop.IOLoop.current().run_sync(tomatoReviewSeach)
-	# for key in Review_dict.keys():
-	# 	print str(key) + "\t" + Movie_dict[key]['title'] + "\n" + str(len(Review_dict[key]['reviews']))	
+  # for myid in IDs:
+  #   print "myid: " + myid     
+  # for key in Movie_dict.keys():
+  #   print str(key) + "\t" + Movie_dict[key]['title'] + "\n" + Movie_dict[key]['synopsis']
+  
+  print bcolors.HEADER + "====== START: tomatoReviewSeach ======" + bcolors.ENDC
+  tornado.ioloop.IOLoop.current().run_sync(tomatoReviewSeach)
+  # for key in Review_dict.keys():
+  #   print str(key) + "\t" + Movie_dict[key]['title'] + "\n" + str(len(Review_dict[key]['reviews'])) 
 
-	print bcolors.HEADER + "====== Saving PICKLE ======" + bcolors.ENDC
-	fileObj = open('../constants/Movie_dict', 'w')
-	pickle.dump(Movie_dict, fileObj)
-	fileObj.close()    
+  print bcolors.HEADER + "====== Saving PICKLE ======" + bcolors.ENDC
+  fileObj = open('../constants/Movie_dict', 'w')
+  pickle.dump(Movie_dict, fileObj)
+  fileObj.close()    
 
-	fileObj = open('../constants/Review_dict', 'w')
-	pickle.dump(Review_dict, fileObj)
-	fileObj.close()    
+  fileObj = open('../constants/Review_dict', 'w')
+  pickle.dump(Review_dict, fileObj)
+  fileObj.close()    
 
 
-	print bcolors.OKGREEN + "Keys in Movie_dict[MovieID]\n" + bcolors.ENDC + str(Movie_dict[Movie_dict.keys()[0]].keys())
-	print bcolors.OKGREEN + "Keys in Review_dict[MovieID]\n" + bcolors.ENDC + str(Review_dict[Review_dict.keys()[0]].keys())
-	
+  print bcolors.OKGREEN + "Keys in Movie_dict[MovieID]\n" + bcolors.ENDC + str(Movie_dict[Movie_dict.keys()[0]].keys())
+  print bcolors.OKGREEN + "Keys in Review_dict[MovieID]\n" + bcolors.ENDC + str(Review_dict[Review_dict.keys()[0]].keys())
+  
 
