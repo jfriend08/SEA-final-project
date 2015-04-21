@@ -1,4 +1,7 @@
 class bcolors(object):
+  '''
+  constants for color code
+  '''
   def __init__(self):
     self.HEADER = '\033[31m'
     self.OKBLUE = '\033[94m'
