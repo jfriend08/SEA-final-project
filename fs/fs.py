@@ -65,6 +65,10 @@ class DisList(object):
     else:
       self.data.remove(val)
 
+  @property
+  def length(self):
+    return len(self.data)
+
   def __str__(self):
     ret = '['
     for i in xrange(len(self.data)):
