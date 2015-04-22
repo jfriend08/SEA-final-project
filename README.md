@@ -2,13 +2,19 @@
 Building up movie seach engine plus customized recommendation system
 
 #tomatoCrawler
-![alt tag](https://drive.google.com/file/d/0BzG5zLRRrgKwYWJUUHBsNmtDRUk/view?usp=sharing)
-
-Will fetch rotten tomato website and save the following pickles:
-./constants/Movie_dict and ./constants/Review_dict
+#Goal: to fetch rotten tomato website and save the info properly
 Now we have:
 - 250 movie to search
 - 1718 movieIDs returned
+```python
+#If you like tomatoCrawler to save Movie_fs, Review_fs, and IDs_fs to file system
+from src import tomatoCrawler
+tomatoCrawler.main2FS()
+
+#Or! just as tomatoCrawler to save Movie_dict, Review_fs, and IDs_fs to ./constants as pickle files
+tomatoCrawler.main2NormalDict()
+```
+
 
 #File System module Usage
 ##Distributed dictionary object
