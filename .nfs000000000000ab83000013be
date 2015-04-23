@@ -5,9 +5,7 @@ Building up movie seach engine plus customized recommendation system
 #Goal: get user's review list, find other similar users, and recommend this user other similar user's movie list
 Current architecture:
 ```python
-# this will start to find available port and fire up 1. recom_front.py and 2. recom_worker.py
-python ./recommendation/recom_start.py
-
+python ./recommendation
 ```
 
 #TomatoCrawler
