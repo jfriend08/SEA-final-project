@@ -16,15 +16,16 @@ for key in tracker.keys():
 
 ## initialize workers
 
-run the script and you will get a .json containing the workers' ip addresses
+run the script and it will generate a .json file containing the workers' ip addresses
 
 ```
 $ python mapreduce/workers.py
-
 ```
 
 ## run your mapper/reducer jobs via the framework
 
+getWorkerInfo() takes one argument: 
+the path to the result json file of executing workers.py
 
 ```python
 
@@ -38,9 +39,6 @@ tornado.ioloop.IOLoop.instance().start()
  
 ```
 
-getWorkerInfo() takes one argument: 
-the path to the result json file of executing workers.py
-
 mapReduce() takes four arguments:
 
 1. jobPath: path to your input files
@@ -52,7 +50,8 @@ mapReduce() takes four arguments:
 def mapReduce(self, jobPath, mapperPath, nReducers, reducerPath):
 
 ```
-and it printout 
+and it printout following information along the way
+
 1. input file names
 2. number of taskIDs
 3. url request to recuders
