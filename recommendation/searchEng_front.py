@@ -18,13 +18,13 @@ fetch MovieServers --> get the users --> calculate similarity --> fetch ReviewSe
 
 
 ports=[]
-ports_movie = []
-ports_review = []
+ports_Idx = []
+ports_Doc = []
 
 
 class Application(tornado.web.Application):
   def __init__(self):
-    handlers = [(r"/recom", recomHandler)]
+    handlers = [(r"/search", recomHandler)]
     tornado.web.Application.__init__(self, handlers)
 
 
@@ -41,8 +41,8 @@ class recomHandler(tornado.web.RequestHandler):
 
 
 class FrontEndApp(object):
-  def __init__(self, MovieServers, ReviewServer):
+  def __init__(self, IdxServer, DocServer):
     global ports_index, ports_Doc
-    ports_movie = MovieServers
-    ports_review = ReviewServer
+    ports_Idx = IdxServer
+    ports_Doc = DocServer
     self.app = tornado.httpserver.HTTPServer(Application() )        
