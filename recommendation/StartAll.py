@@ -67,8 +67,10 @@ def getPorts():
 
 
 def main():
-  import recom_worker, recom_front
-  import searchEng_worker, searchEng_front
+  # from recommendation import recom_worker, recom_front
+  # from recommendation import searchEng_worker, searchEng_front  
+  from src import localIndexer
+
   global masterServer, MovieServer, ReviewServer, IdxServer, DocServer, Baseport
   
   getPorts()
@@ -81,41 +83,44 @@ def main():
   print "DocServer:\t" + str(DocServer)
   print "ClassifierServer:\t" + str(ClassifierServer)
   
-  
-  uid = fork_processes(NumMaster+NumMovie+NumReview+NumIdx+NumDoc)
-  # uid = fork_processes(NumMaster+NumMovie+NumReview+NumIdx+NumDoc)
-  if uid == 0:
-    sockets = bind_sockets(masterServer[uid].split(':')[-1])
-    myfront = recom_front.FrontEndApp(MovieServer, ReviewServer)
-    server  = myfront.app
-  elif uid ==1:
-    sockets = bind_sockets(masterServer[uid].split(':')[-1])
-    # myfront = searchEng_front.FrontEndApp(IdxServer, DocServer)
-    myfront = searchEng_front.FrontEndApp(IdxServer, DocServer)
-    server  = myfront.app
-  elif uid < NumMaster + NumMovie:
-    myIdx = uid - NumMaster
-    sockets = bind_sockets(MovieServer[myIdx].split(':')[-1])    
-    myback_movie = recom_worker.RecommApp('MovieServer', myIdx, MovieServer[myIdx].split(':')[-1])
-    server  = myback_movie.app
-  elif uid < NumMaster + NumMovie + NumReview:
-    myIdx = uid - NumMovie - NumMaster
-    sockets = bind_sockets(ReviewServer[myIdx].split(':')[-1])
-    myback_review = recom_worker.RecommApp('ReviewServer', myIdx, ReviewServer[myIdx].split(':')[-1])
-    server  = myback_review.app
-  elif uid < NumMaster + NumMovie + NumReview + NumIdx:
-      myIdx = uid-NumMovie-NumReview-NumMaster
-      sockets = bind_sockets(IdxServer[myIdx].split(':')[-1])    
-      myback_idx = searchEng_worker.RecommApp('IndexServer', myIdx, IdxServer[myIdx].split(':')[-1])
-      server  = myback_idx.app
-  elif uid < NumMaster + NumMovie + NumReview + NumIdx + NumDoc:
-      myIdx = uid-NumMovie-NumReview-NumIdx-NumMaster
-      sockets = bind_sockets(DocServer[myIdx].split(':')[-1])    
-      myback_doc = searchEng_worker.RecommApp('DocumentServer', myIdx, DocServer[myIdx].split(':')[-1])
-      server  = myback_doc.app
 
-  server.add_sockets(sockets)
-  tornado.ioloop.IOLoop.instance().start()
+  localIndexer.ReviewIndexing()
+
+  
+  # uid = fork_processes(NumMaster+NumMovie+NumReview+NumIdx+NumDoc)
+  # # uid = fork_processes(NumMaster+NumMovie+NumReview+NumIdx+NumDoc)
+  # if uid == 0:
+  #   sockets = bind_sockets(masterServer[uid].split(':')[-1])
+  #   myfront = recom_front.FrontEndApp(MovieServer, ReviewServer)
+  #   server  = myfront.app
+  # elif uid ==1:
+  #   sockets = bind_sockets(masterServer[uid].split(':')[-1])
+  #   # myfront = searchEng_front.FrontEndApp(IdxServer, DocServer)
+  #   myfront = searchEng_front.FrontEndApp(IdxServer, DocServer)
+  #   server  = myfront.app
+  # elif uid < NumMaster + NumMovie:
+  #   myIdx = uid - NumMaster
+  #   sockets = bind_sockets(MovieServer[myIdx].split(':')[-1])    
+  #   myback_movie = recom_worker.RecommApp('MovieServer', myIdx, MovieServer[myIdx].split(':')[-1])
+  #   server  = myback_movie.app
+  # elif uid < NumMaster + NumMovie + NumReview:
+  #   myIdx = uid - NumMovie - NumMaster
+  #   sockets = bind_sockets(ReviewServer[myIdx].split(':')[-1])
+  #   myback_review = recom_worker.RecommApp('ReviewServer', myIdx, ReviewServer[myIdx].split(':')[-1])
+  #   server  = myback_review.app
+  # elif uid < NumMaster + NumMovie + NumReview + NumIdx:
+  #     myIdx = uid-NumMovie-NumReview-NumMaster
+  #     sockets = bind_sockets(IdxServer[myIdx].split(':')[-1])    
+  #     myback_idx = searchEng_worker.RecommApp('IndexServer', myIdx, IdxServer[myIdx].split(':')[-1])
+  #     server  = myback_idx.app
+  # elif uid < NumMaster + NumMovie + NumReview + NumIdx + NumDoc:
+  #     myIdx = uid-NumMovie-NumReview-NumIdx-NumMaster
+  #     sockets = bind_sockets(DocServer[myIdx].split(':')[-1])    
+  #     myback_doc = searchEng_worker.RecommApp('DocumentServer', myIdx, DocServer[myIdx].split(':')[-1])
+  #     server  = myback_doc.app
+
+  # server.add_sockets(sockets)
+  # tornado.ioloop.IOLoop.instance().start()
 
 
 
