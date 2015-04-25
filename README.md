@@ -9,10 +9,11 @@ python ./StartAll.py
 ```
 ##Structure:
 The structure of fired-uped HTTP servers are:
-
+```
                         --> classifier_front(?)   --> ?
 User --> SuperFront     --> searchEng_front       --> searchEng_worker (inclusing IndexServer*3, and DocumentServer*3)
                         --> recom_front           --> recom_worker (inclusing MovieServer*3, and ReviewServer*3)
+```
 
 #TomatoCrawler
 #Goal: to fetch rotten tomato website and save the info properly
