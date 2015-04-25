@@ -21,6 +21,19 @@ from tornado.process import fork_processes
 from tornado.netutil import bind_sockets
 
 '''
+The purpose of StartAll is literally stating all modules!
+You will need to have the idea for how many server you need to start up. 
+Then, it will to the following proceduer:
+1. Find available ports according to the number you specified
+2. Indexing, and partision (by hashing or modulo) the files according to your number
+3. Fire up all the HTTP servers
+
+The structure of HTTP server is:
+
+                      --> classifier_front(?)   -->
+User --> SuperFront   --> searchEng_front       --> searchEng_worker (inclusing IndexServer*3, and DocumentServer*3)
+                      --> recom_front           --> recom_worker (inclusing MovieServer*3, and ReviewServer*3)
+
 The purpose of recom_start is to fire up all recom_workers for recommendation, search enigine, and even classifier
 Currently involves these parts:
 1. get all the ports

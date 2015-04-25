@@ -1,14 +1,18 @@
 # SEA-final-project
 Building up movie seach engine plus customized recommendation system
 
-#Recommendation system
-#Goal: get user's review list, find other similar users, and recommend this user other similar user's movie list
-Current architecture:
+#Start All the works
+##Goal: 1. find ports, 2. indexing, 3. fire up all servers
 ```python
-# this will start to find available port and fire up 1. recom_front.py and 2. recom_worker.py
-python ./recommendation/recom_start.py
+python ./StartAll.py
 
 ```
+##Structure:
+The structure of fired-uped HTTP servers are:
+
+                        --> classifier_front(?)   --> ?
+User --> SuperFront     --> searchEng_front       --> searchEng_worker (inclusing IndexServer*3, and DocumentServer*3)
+                        --> recom_front           --> recom_worker (inclusing MovieServer*3, and ReviewServer*3)
 
 #TomatoCrawler
 #Goal: to fetch rotten tomato website and save the info properly
