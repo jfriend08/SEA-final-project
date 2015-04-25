@@ -1,7 +1,21 @@
 # SEA-final-project
 Building up movie seach engine plus customized recommendation system
 
-#tomatoCrawler
+#Start All the works
+##Goal: 1. find ports, 2. indexing, 3. fire up all servers
+```python
+python ./StartAll.py
+
+```
+##Structure:
+The structure of fired-uped HTTP servers are:
+```
+                        --> classifier_front(?)   --> ?
+User --> SuperFront     --> searchEng_front       --> searchEng_worker (inclusing IndexServer*3, and DocumentServer*3)
+                        --> recom_front           --> recom_worker (inclusing MovieServer*3, and ReviewServer*3)
+```
+
+#TomatoCrawler
 #Goal: to fetch rotten tomato website and save the info properly
 Now we have:
 - 250 movie to search
