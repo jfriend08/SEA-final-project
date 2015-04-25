@@ -178,7 +178,7 @@ def main2FS():
   print bcolors.HEADER + "====== START: tomatoReviewSeach ======" + bcolors.ENDC  
   tornado.ioloop.IOLoop.current().run_sync(tomatoReviewSeach2FS)  
 
-  savePickle() this is just for current usage
+  # savePickle() #this is just for current usage
 
 
 
@@ -196,10 +196,5 @@ def main2NormalDict():
 if __name__ == "__main__":        
   main2FS()
   # main()  
-
-
-
-
-
 
 
