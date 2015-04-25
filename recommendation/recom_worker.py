@@ -55,14 +55,14 @@ class reviewHandler(tornado.web.RequestHandler):
 
 class RecommApp(object):
   def __init__(self, serverType, serverNum, port):    
-    # if (serverType=='MovieServer'):
-    #   pass
-    #   # path = os.path.dirname(__file__) + '/../pickle/indexServer' + str(serverNum)
-    # elif (serverType=='ReviewServer'):
-    #   pass
-    #   # path = os.path.dirname(__file__) + '/../pickle/docServer' + str(serverNum)
-    # else:
-    #   raise NameError('path error')
+    if (serverType=='MovieServer'):
+      pass
+      path = os.path.dirname(__file__) + '/../pickle/indexServer' + str(serverNum)
+    elif (serverType=='ReviewServer'):
+      pass
+      path = os.path.dirname(__file__) + '/../pickle/docServer' + str(serverNum)
+    else:
+      raise NameError('path error')
 
     self.app = tornado.httpserver.HTTPServer(Application(serverType) ) 
 
