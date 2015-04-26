@@ -1,3 +1,13 @@
+import tornado.web
+
+try:
+  import cPickle as pickle
+except:
+  import pickle
+
+'''
+Definition of Worker's file system handler
+'''
 
 class FSWorker(object):
   def __init__(self, host):

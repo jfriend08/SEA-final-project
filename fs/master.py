@@ -1,13 +1,16 @@
 from tornado.httpclient import AsyncHTTPClient
 from tornado import gen
-import tornado.ioloop
 
-from fs import DisTable
+import tornado.web
 
 try:
   import cPickle as pickle
 except:
   import pickle
+
+'''
+Definition of Master's file system handler
+'''
 
 def formatQuery(host, type, args):
   for key in args:
@@ -19,12 +22,12 @@ class FSMaster(object):
   def __init__(self, workers):
     self.workers = workers
     self.num_workers = len(workers)
-    self.tables = DisTable()
+    self.tables = {}
     self.client = AsyncHTTPClient()
 
   @gen.coroutine
-  def create(self, tableName, res, initVal={}):
-    if self.tables.hasKey(tableName):
+  def create(self, tableName, initVal={}):
+    if not tableName in self.tables:
       raise KeyError, 'Table name already existed'
 
     vals = {}
@@ -36,14 +39,14 @@ class FSMaster(object):
 
     futures = []
     for worker_id in xrange(self.num_workers):
-      param = {'tableName': tableName, 'initVal': vals[worker_id]}
+      param = {'tableName': tableName, 'initVal': pickle.dumps(vals[worker_id])}
       futures.append(self.client.fetch(formatQuery(self.workers[worker_id], 'create', param)))
 
     self.tables[tableName] = True
 
   @gen.coroutine
   def get(self, tableName, key, res):
-    if not self.tables.hasKey(tableName):
+    if not tableName in self.tables:
       raise KeyError, 'Table not found!'
     worker = self.workers[hash(key) % self.num_workers]
     param = {'tableName': tableName, 'key': key}
@@ -53,7 +56,7 @@ class FSMaster(object):
 
   @gen.coroutine
   def set(self, tableName, key, val):
-    if not self.tables.hasKey(tableName):
+    if not tableName in self.tables:
       raise KeyError, 'Table not Found!'
     worker = self.workers[hash(key) % self.num_workers]
     param = {'tableName': tableName, 'key': key, 'val': pickle.dumps(val)}
@@ -62,8 +65,8 @@ class FSMaster(object):
     futures.append(self.client.fetch(formatQuery(worker, 'set', param)))
 
   @gen.coroutine
-  def remove(self, tableName, key=None):
-    if not self.tables.hasKey(tableName):
+  def remove(self, tableName, key):
+    if not tableName in self.tables:
       #Silently fails
       return
 
