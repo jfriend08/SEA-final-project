@@ -14,6 +14,9 @@ class FSWorker(object):
    self.tables[tableName][key] = val
 
   def remove(self, tableName, key=None):
+    if not key in self.tables[tableName]:
+      return
+
     if key is None:
       del self.tables[tableName]
     else:
