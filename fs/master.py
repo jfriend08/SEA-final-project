@@ -27,14 +27,19 @@ class FSMaster(object):
     if self.tables.hasKey(tableName):
       raise KeyError, 'Table name already existed'
 
-    futures = []
-    for worker in self.workers:
-      param = {'tableName': tableName}
-      if len(initVal.keys()) > 0:
-        param['initVal'] = pickle.dumps(initVal)
-      futures.append(self.client.fetch(formatQuery(worker, 'create', param)))
+    vals = {}
+    for worker_id in xrange(self.num_workers):
+      vals[worker_id] = {}
+    for key in initVal:
+      worker = hash(key) % self.num_workers
+      vals[worker][key] = initVal[key]
 
-    self.tables[tableName] = type(initVal)
+    futures = []
+    for worker_id in xrange(self.num_workers):
+      param = {'tableName': tableName, 'initVal': vals[worker_id]}
+      futures.append(self.client.fetch(formatQuery(self.workers[worker_id], 'create', param)))
+
+    self.tables[tableName] = True
 
   @gen.coroutine
   def get(self, tableName, key, res):
