@@ -90,6 +90,7 @@ class DisTable(object):
   returns - any, data of this table given key
   '''
   def __getitem__(self, key):
+    print key
     return self.data[key]
 
   '''
@@ -98,8 +99,6 @@ class DisTable(object):
   param val - value to be updated into table
   '''
   def __setitem__(self, key, val):
-    print 'key:', key
-    print 'val:', val
     self.data[key] = val
 
   '''

@@ -1,13 +1,20 @@
 
 class FSWorker(object):
-  def __init__(self):
-    pass
+  def __init__(self, host):
+    self.host = host
+    self.tables = {}
 
-  def get(self):
-    raise NotImplementedError
+  def create(self, tableName, initVal={}):
+    self.tables[tableName] = initVal
 
-  def set(self):
-    raise NotImplementedError
+  def get(self, tableName, key):
+    return self.tables[tableName][key]
 
-  def remove(self):
-    raise NotImplementedError
+  def set(self, tableName, key, val):
+   self.tables[tableName][key] = val
+
+  def remove(self, tableName, key=None):
+    if key is None:
+      del self.tables[tableName]
+    else:
+      del self.tables[tableName][key]
