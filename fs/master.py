@@ -23,7 +23,7 @@ class FSMaster(object):
     self.client = AsyncHTTPClient()
 
   @gen.coroutine
-  def create(self, tableName, initVal={}):
+  def create(self, tableName, res, initVal={}):
     if self.tables.hasKey(tableName):
       raise KeyError, 'Table name already existed'
 
@@ -34,7 +34,7 @@ class FSMaster(object):
         param['initVal'] = pickle.dumps(initVal)
       futures.append(self.client.fetch(formatQuery(worker, 'create', param)))
 
-    self.tables[tableName] = initVal
+    self.tables[tableName] = type(initVal)
 
   @gen.coroutine
   def get(self, tableName, key, res):

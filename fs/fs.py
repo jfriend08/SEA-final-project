@@ -1,3 +1,17 @@
+import uuid
+from tornado.httpclient import HTTPClient
+from tornado import gen
+
+try:
+  import cPickle as pickle
+except:
+  import pickle
+
+def formatQuery(host, type, args):
+  for key in args:
+    param = '&'.join(['{0}={1}'.format(k, args[k]) for k in args])
+
+  return '{0}/{1}?{2}'.format(host, type, param)
 
 def formatEntry(val, indent):
   return '\t' * indent + str(val) + '\n'
@@ -79,19 +93,24 @@ class DisList(object):
 Distributed table Object
 '''
 class DisTable(object):
-  def __init__(self, initVal=None):
-    if initVal:
-      self.data = initVal
-    else:
-      self.data = {}
+  def __init__(self, initVal={}):
+    self.name = uuid.uuid4().hex
+    #XXX: Need to use sync client
+    self.client = HTTPClient()
+    #TODO: Sync this with inventory module
+    self.master = ''
+    #Create request to master
+    param['tableName'] = self.name
+    param['initVal'] = pickle.dumps(initVal)
+    self.client.fetch(formatQuery(self.master, 'create', param))
 
   '''
   Getter
   returns - any, data of this table given key
   '''
   def __getitem__(self, key):
-    print key
-    return self.data[key]
+    param = {'tableName': self.name, 'key': key}
+    return self.client.fetch(formatQuery(self.master, 'get', param)).body
 
   '''
   Setter
@@ -99,7 +118,10 @@ class DisTable(object):
   param val - value to be updated into table
   '''
   def __setitem__(self, key, val):
-    self.data[key] = val
+    param = {'tableName': self.name, 'key': key, 'val': val}
+    return self.client.fetch(formatQuery(self.master, 'set', param)).body
+
+  #TODO: Below needs to be implemented
 
   '''
   Pop data of this key
@@ -107,10 +129,7 @@ class DisTable(object):
   returns - AnyType, whatever value stored with key, None if there's no such value
   '''
   def pop(self, key):
-    try:
-      return self.data.pop(key)
-    except KeyError:
-      return None
+    raise NotImplementedError
 
   '''
   Determine if table already has this key
@@ -118,11 +137,11 @@ class DisTable(object):
   returns - Boolean, True if this key is already in the table, False otherwise
   '''
   def hasKey(self, key):
-    return key in self.data
+    raise NotImplementedError
 
   @property
   def length(self):
-    return len(self.data.keys())
+    raise NotImplementedError
 
   def __str__(self):
-    return prettyPrint(self.data, 0)
+    raise NotImplementedError
