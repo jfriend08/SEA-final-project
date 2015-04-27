@@ -7,5 +7,5 @@ for line in sys.stdin:
   key = kvPair[0]
   value = eval(kvPair[1])
   indexer[key] = value
-print pickle.dump(indexer)
+print pickle.dumps(indexer)
 
