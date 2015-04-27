@@ -9,7 +9,6 @@ import subprocess
 import uuid
 # 
 from ..config import settings
-#import config.settings
 
 mapResult = {}
 

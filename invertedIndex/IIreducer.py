@@ -4,7 +4,7 @@ from itertools import groupby, imap
 from operator import itemgetter
 import sys
 import pickle
-import mapreduce.config.settings as settings
+from mapreduce.config import settings
 
 invertedIndexes = {}
 data = imap(lambda x: x.strip().split(settings.delimiter), sys.stdin)

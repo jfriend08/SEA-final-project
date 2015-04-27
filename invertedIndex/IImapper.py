@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys
-import mapreduce.config.settings as settings
+from mapreduce.config import settings
 
 tracker = {}
 eop = True

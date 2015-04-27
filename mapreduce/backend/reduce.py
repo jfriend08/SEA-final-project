@@ -44,7 +44,7 @@ class ReduceHandler(tornado.web.RequestHandler):
 		# write to file
     if out:
       if not os.path.exists(outputDir): os.mkdir(outputDir)
-      path = directory + '/' + str(reducerIx) + '.out'
+      path = outputDir + '/' + str(reducerIx) + '.out'
       file = open(path, 'w')
       file.write(str(out))
       file.close()
