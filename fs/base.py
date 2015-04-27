@@ -2,6 +2,8 @@ import uuid
 from tornado.httpclient import HTTPClient
 from tornado import gen
 
+import fs
+
 try:
   import cPickle as pickle
 except:
@@ -97,11 +99,9 @@ class DisTable(object):
     self.name = uuid.uuid4().hex
     #XXX: Need to use sync client
     self.client = HTTPClient()
-    #TODO: Sync this with inventory module
-    self.master = ''
+    self.master = fs.MASTER
     #Create request to master
-    param['tableName'] = self.name
-    param['initVal'] = pickle.dumps(initVal)
+    param = {'tableName': self.name, 'initVal': pickle.dumps(initVal)}
     self.client.fetch(formatQuery(self.master, 'create', param))
 
   '''
