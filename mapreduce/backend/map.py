@@ -8,7 +8,7 @@ import json
 import subprocess
 import uuid
 # 
-from mapreduce.config import settings
+from ..config import settings
 
 mapResult = {}
 
@@ -22,8 +22,7 @@ class MapHandler(tornado.web.RequestHandler):
     # run mapper
     file = open(inputPath, 'r')
     content = file.read()
-    print mapperPath
-    p = subprocess.Popen(["python", "-m" ,mapperPath], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    p = subprocess.Popen(["python", "-m", mapperPath], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     (out, err) = p.communicate(content)
     # if error
     if err:
