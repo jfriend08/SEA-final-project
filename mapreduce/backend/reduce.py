@@ -10,7 +10,7 @@ import subprocess
 import os
 from heapq import merge
 # 
-from ..config import settings
+from mapreduce.config import settings
 
 class ReduceHandler(tornado.web.RequestHandler):
   @gen.coroutine
