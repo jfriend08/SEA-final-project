@@ -10,7 +10,7 @@ import subprocess
 import os
 from heapq import merge
 # 
-from config import settings
+from ..config import settings
 
 class ReduceHandler(tornado.web.RequestHandler):
   @gen.coroutine
@@ -38,7 +38,7 @@ class ReduceHandler(tornado.web.RequestHandler):
 
     # run reducers
     inputString = '\n'.join(settings.delimiter.join(s for s in pair) for pair in data)
-    p = subprocess.Popen(reducerPath, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    p = subprocess.Popen(['python', '-m', reducerPath], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     (out, err) = p.communicate(inputString.encode('utf-8'))
 		
 		# write to file
