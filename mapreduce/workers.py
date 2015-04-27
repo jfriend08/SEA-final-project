@@ -1,4 +1,3 @@
-from config import inventory
 # tornado
 from tornado.process import fork_processes
 import tornado.ioloop
