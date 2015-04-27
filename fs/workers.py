@@ -15,10 +15,13 @@ class FSWorker(object):
     self.tables = {}
 
   def create(self, tableName, initVal={}):
-    self.tables[tableName] = initVal
+    self.tables[tableName] = {}
+    for key in initVal:
+      self.tables[tableName][str(key)] = initVal[key]
+    print 'Worker {0} CREATE:'.format(self.host), self.tables[tableName]
 
-  def get(self, tableName, key):
-    return self.tables[tableName][key]
+  def get(self, tableName, key, res):
+    res.write(self.tables[tableName][str(key)])
 
   def set(self, tableName, key, val):
    self.tables[tableName][key] = val

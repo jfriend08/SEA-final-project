@@ -16,7 +16,7 @@ def formatQuery(host, type, args):
   for key in args:
     param = '&'.join(['{0}={1}'.format(k, args[k]) for k in args])
 
-  return '{0}/{1}?{2}'.format(host, type, param)
+  return '{0}/fs?type={1}&{2}'.format(host, type, param)
 
 class FSMaster(object):
   def __init__(self, workers):
@@ -27,15 +27,17 @@ class FSMaster(object):
 
   @gen.coroutine
   def create(self, tableName, initVal={}):
-    if not tableName in self.tables:
+    if tableName in self.tables:
       raise KeyError, 'Table name already existed'
+
+    print 'MASTER CREATE:', initVal
 
     vals = {}
     for worker_id in xrange(self.num_workers):
       vals[worker_id] = {}
     for key in initVal:
-      worker = hash(key) % self.num_workers
-      vals[worker][key] = initVal[key]
+      worker = hash(str(key)) % self.num_workers
+      vals[worker][str(key)] = initVal[key]
 
     futures = []
     for worker_id in xrange(self.num_workers):
@@ -48,8 +50,10 @@ class FSMaster(object):
   def get(self, tableName, key, res):
     if not tableName in self.tables:
       raise KeyError, 'Table not found!'
-    worker = self.workers[hash(key) % self.num_workers]
+    worker = self.workers[hash(str(key)) % self.num_workers]
     param = {'tableName': tableName, 'key': key}
+
+    print 'MASTER GET: {0}.{1} from {2}'.format(tableName, key, worker)
 
     response = yield self.client.fetch(formatQuery(worker, 'get', param))
     res.write(response.body)
@@ -60,6 +64,8 @@ class FSMaster(object):
       raise KeyError, 'Table not Found!'
     worker = self.workers[hash(key) % self.num_workers]
     param = {'tableName': tableName, 'key': key, 'val': pickle.dumps(val)}
+
+    print 'MASTER SET: {0}.{1} with {2} to {3}'.format(tableName, key, val, worker)
 
     futures = []
     futures.append(self.client.fetch(formatQuery(worker, 'set', param)))

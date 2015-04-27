@@ -1,13 +1,18 @@
 from base import DisList, DisTable
+from handler import FSHandler
+from master import FSMaster
+from workers import FSWorker
 
 from .constants import Inventory
 
 INVENTORY = None
-MASTER = None
 
-def setMaster(host):
-  global MASTER
-  MASTER = host
+def setMaster(host, port):
+  global INVENTORY
+
+  if INVENTORY == None:
+    INVENTORY = Inventory()
+  INVENTORY.setMaster(host, port)
 
 def addWorker(hostName, port):
   global INVENTORY

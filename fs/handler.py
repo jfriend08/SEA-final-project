@@ -6,14 +6,14 @@ except:
   import pickle
 
 class FSHandler(tornado.web.RequestHandler):
-  def initialize(self, masterObj):
-    self.masterObj = masterObj
+  def initialize(self, processObj):
+    self.processObj = processObj
     #Registered methods
     self.method = {
-      'create': self.masterObj.create,
-      'get': self.masterObj.get,
-      'set': self.masterObj.set,
-      'remove': self.masterObj.remove
+      'create': self.processObj.create,
+      'get': self.processObj.get,
+      'set': self.processObj.set,
+      'remove': self.processObj.remove
     }
 
   def get(self):
@@ -26,7 +26,7 @@ class FSHandler(tornado.web.RequestHandler):
       key = None
 
     if type == 'create':
-      initVal = pickle.loads(self.get_argument('initVal'))
+      initVal = pickle.loads(str(self.get_argument('initVal')))
       self.method[type](tableName, initVal)
     elif type == 'set':
       val = self.get_argument('val')

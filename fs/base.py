@@ -13,7 +13,7 @@ def formatQuery(host, type, args):
   for key in args:
     param = '&'.join(['{0}={1}'.format(k, args[k]) for k in args])
 
-  return '{0}/{1}?{2}'.format(host, type, param)
+  return '{0}/fs?type={1}&{2}'.format(host, type, param)
 
 def formatEntry(val, indent):
   return '\t' * indent + str(val) + '\n'
@@ -99,7 +99,7 @@ class DisTable(object):
     self.name = uuid.uuid4().hex
     #XXX: Need to use sync client
     self.client = HTTPClient()
-    self.master = fs.MASTER
+    self.master = fs.INVENTORY.getMaster()
     #Create request to master
     param = {'tableName': self.name, 'initVal': pickle.dumps(initVal)}
     self.client.fetch(formatQuery(self.master, 'create', param))
