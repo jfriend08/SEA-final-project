@@ -1,6 +1,5 @@
 import sys
 from mapreduce.config import settings
-print '-----movie indexer mapper running'
 for line in sys.stdin:
   kvPair = line.split(settings.delimiter, 1)
   key = kvPair[0]
