@@ -35,7 +35,7 @@ Current UserLog is created by:
 ```
 python ./src/createFakeUserLog.py
 
-#So it will create 20 reviews with random scoring on random movie. Total for 50 users with unique ID created.  
+#So it will create 20 reviews per user with random scoring on random movie. Total for 50 users with unique ID created.  
 #saved at ../userLog/myUserBook
 ```
 
