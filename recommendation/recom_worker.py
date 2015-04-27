@@ -4,7 +4,7 @@ import tornado.web
 import hashlib
 import socket
 import getpass
-import os, re, math
+import os, re, math, sys
 import json
 import pickle
 import urllib
@@ -16,6 +16,10 @@ from tornado import gen
 from tornado.options import define, options
 import subprocess
 from operator import mul
+
+sys.path.append('../')
+from src import color
+bcolors = color.bcolors()
 
 
 '''
@@ -43,27 +47,64 @@ class Application(tornado.web.Application):
 class movieHandler(tornado.web.RequestHandler):
   @gen.coroutine            
   def get(self):
-    self.write("movieHandler")
+    global invertedIndex, tokenizer
+    movieIDs = self.get_argument('movieID', None)
+    MovieList = [str(t) for t in tokenizer.tokenize(movieIDs)] 
+    # print "movieIDs" + str(MovieList)        
+    
+    result = {}
+    for eachMovie in MovieList:      
+      if eachMovie in invertedIndex:
+        try:
+          result[eachMovie].append(invertedIndex[eachMovie])
+        except:
+          result[eachMovie]=invertedIndex[eachMovie]
+      else:
+        pass
+    
+
+    self.write(json.dumps(result))
+
+
 
 class reviewHandler(tornado.web.RequestHandler):
   @gen.coroutine            
   def get(self):
-    self.write("reviewHandler")
+    global invertedIndex, tokenizer
+    ALLcritic = self.get_argument('critics', None)        
+    ALLcritic = [t.replace("_", " ") for t in tokenizer.tokenize(ALLcritic)]
+    print "ALLcritic:\n%s" % ALLcritic
+
+    result = {}
+    for eachCritic in ALLcritic:
+      if eachCritic in invertedIndex:
+        try:
+          result[eachCritic].append(invertedIndex[eachCritic])
+        except:
+          result[eachCritic]=invertedIndex[eachCritic]
+      else:
+        pass
+
+    self.write(json.dumps(result))
 
 
 
 
 class RecommApp(object):
   def __init__(self, serverType, serverNum, port):    
+    global invertedIndex, tokenizer
     if (serverType=='MovieServer'):
       pass
-      path = os.path.dirname(__file__) + '/../pickle/indexServer' + str(serverNum)
+      path = os.path.dirname(__file__) + '/../constants/Movie_Index' + str(serverNum)      
     elif (serverType=='ReviewServer'):
       pass
-      path = os.path.dirname(__file__) + '/../pickle/docServer' + str(serverNum)
+      path = os.path.dirname(__file__) + '/../constants/Review_Index' + str(serverNum)
     else:
-      raise NameError('path error')
-
+      raise NameError('path error')    
+    
+    invertedIndex = pickle.load(open(path, 'r'))
+    print bcolors.OKGREEN + "%s_%s\tLoading: %s\nNum of Keys:\t%s\n_____________" %(str(serverType), str(port), str(path), str(len(invertedIndex.keys()))) + bcolors.ENDC     
+    tokenizer = RegexpTokenizer(r'\w+\.\_\w+|\w+\'\w+|\w+')
     self.app = tornado.httpserver.HTTPServer(Application(serverType) ) 
 
 

@@ -25,7 +25,7 @@ Now we have:
 from src import tomatoCrawler
 tomatoCrawler.main2FS()
 
-#Or! just as tomatoCrawler to save Movie_dict, Review_fs, and IDs_fs to ./constants as pickle files
+#Or! just ask tomatoCrawler to save Movie_dict, Review_fs, and IDs_fs to ./constants as pickle files
 tomatoCrawler.main2NormalDict()
 ```
 
