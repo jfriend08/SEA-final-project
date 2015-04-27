@@ -14,9 +14,34 @@ The structure of fired-uped HTTP servers are:
 User --> SuperFront     --> searchEng_front       --> searchEng_worker (inclusing IndexServer*3, and DocumentServer*3)
                         --> recom_front           --> recom_worker (inclusing MovieServer*3, and ReviewServer*3)
 ```
+#Recommendation System:
+###Goal: getting the user ID --> check user log to get review history --> check MovieServer to get similar critics --> check ReviewServer to get movies sorted by weighted rating
+###Stucture and Usage:
+```
+recom_front --> MovieServer*3
+            --> ReviewServer*3
+
+#recom_front api: 
+#http://linserv2.cims.nyu.edu:46829/recom?user=UserID (e.g. http://linserv2.cims.nyu.edu:46829/recom?user=d0aa6e9b-676b-428f-9758-65e7c09b38a4)
+
+#MovieServer api:
+# http://linserv2.cims.nyu.edu:46831/movie?movieID=MovieIDs (e.g. http://linserv2.cims.nyu.edu:46831/movie?movieID=770802394+770882996+12900+13217+11705+770876740+770710325+771362322+533693794+348462568)
+
+#ReviewServer api:
+#http://linserv2.cims.nyu.edu:46834/review?critics=CRITICS (e.g. http://linserv2.cims.nyu.edu:46834/review?critics=Emanuel_Levy+Roger_Ebert)
+```
+
+Current UserLog is created by:
+```
+python ./src/createFakeUserLog.py
+
+#So it will create 20 reviews with random scoring on random movie. Total for 50 users with unique ID created.  
+#saved at ../userLog/myUserBook
+```
+
 
 #TomatoCrawler
-#Goal: to fetch rotten tomato website and save the info properly
+##Goal: to fetch rotten tomato website and save the info properly
 Now we have:
 - 250 movie to search
 - 1718 movieIDs returned

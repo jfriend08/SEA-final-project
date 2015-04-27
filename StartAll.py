@@ -71,8 +71,8 @@ NumClassifier = 4 #for classifier
 def getPorts():
   global SuperFront, masterServer, MovieServer, ReviewServer, IdxServer, DocServer, Baseport, ClassifierServer
   from recommendation import inventory  
-  # guessPort = 27375 #will start with this port and find the avaliable ports
-  guessPort = 28300 #will start with this port and find the avaliable ports
+  guessPort = 27375 #will start with this port and find the avaliable ports
+  # guessPort = 28300 #will start with this port and find the avaliable ports
   allserver = inventory.Inventory()
   Baseport = allserver.callBasePort(guessPort)
   allserver.findPorts( socket.gethostname(), NumSuperFront, NumMaster, NumMovie, NumReview, NumIdx, NumDoc, NumClassifier, Baseport)
@@ -85,10 +85,14 @@ def main():
   from recommendation import searchEng_worker, searchEng_front  
   from src import localIndexer
   from src import color
+  # from src import tomatoCrawler as TC
   C = color.bcolors()
 
   global masterServer, MovieServer, ReviewServer, IdxServer, DocServer, Baseport
   
+  print C.HEADER + "=========== Start Crawling ===========" + C.ENDC
+  # TC.main2Genre()
+
   print C.HEADER + "=========== Find Available Ports ===========" + C.ENDC
   getPorts()
 
@@ -106,6 +110,7 @@ def main():
   print C.HEADER + "=========== Fire Up All Servers ===========" + C.ENDC
   uid = fork_processes(NumMaster+NumMovie+NumReview+NumIdx+NumDoc)
   # uid = fork_processes(NumMaster+NumMovie+NumReview+NumIdx+NumDoc)
+  
   if uid == 0:
     sockets = bind_sockets(masterServer[uid].split(':')[-1])
     myfront = recom_front.FrontEndApp(MovieServer, ReviewServer)
