@@ -47,7 +47,7 @@ tn.generateWeightTable(weights_dir)
 
 ## run the servers
 
-usage: servers.py [-h] --genresPath <PATH_TO_PICKLED_GENRE_LIST> --weightsPath <PATH_TO_PICKLED_GENRE_WEIGHTS_DICT> [<NUM_OF_SERVER>] [<PATH_TO_SERVER_ADDRESSES>]
+usage: servers.py [-h] --genresPath <PATH_TO_PICKLED_GENRE_LIST> --weightsPath <PATH_TO_PICKLED_GENRE_WEIGHTS_DICT> \[<NUM_OF_SERVER>\] \[<PATH_TO_SERVER_ADDRESSES>\]
 
 ```
 $ python -m classification.servers --genresPath constants/classification_weights/genres.p --weightsPath constants/classification_weights/big_weight.p 3 classification/server_address.json
