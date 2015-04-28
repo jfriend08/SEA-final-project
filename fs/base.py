@@ -107,7 +107,10 @@ class DisTable(object):
   '''
   def __getitem__(self, key):
     param = {'tableName': self.name, 'key': key}
-    return self.client.fetch(formatQuery(self.master, 'get', param)).body
+    res = self.client.fetch(formatQuery(self.master, 'get', param))
+    print res
+    print res.body
+    return res.body
 
   '''
   Setter

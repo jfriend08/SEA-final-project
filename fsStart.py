@@ -26,7 +26,7 @@ if __name__ == '__main__':
   sockets = bind_sockets(BASE_PORT + uid)
 
   if uid == 0:
-    process = FSMaster(fs.INVENTORY.getWorkers())
+    process = FSMaster(fs.INVENTORY.getMaster(), fs.INVENTORY.getWorkers())
   else:
     process = FSWorker(fs.INVENTORY.getWorkers()[uid-1])
 

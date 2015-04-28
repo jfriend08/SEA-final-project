@@ -1,7 +1,9 @@
-from tornado.httpclient import AsyncHTTPClient
+from tornado.httpclient import AsyncHTTPClient, HTTPResponse
 from tornado import gen
-
+from tornado.concurrent import TracebackFuture as Future
 import tornado.web
+
+import cStringIO
 
 try:
   import cPickle as pickle
@@ -16,14 +18,14 @@ def formatQuery(host, type, args):
   return '{0}/fs?type={1}&param={2}'.format(host, type, pickle.dumps(args))
 
 class FSMaster(object):
-  def __init__(self, workers):
+  def __init__(self, host, workers):
+    self.host = host
     self.workers = workers
     self.num_workers = len(workers)
     self.tables = {}
     self.client = AsyncHTTPClient()
 
-  @gen.coroutine
-  def create(self, param, res):
+  def create(self, param, req):
     tableName = param['tableName']
     initVal = param['initVal']
     if tableName in self.tables:
@@ -44,9 +46,12 @@ class FSMaster(object):
       futures.append(self.client.fetch(formatQuery(self.workers[worker_id], 'create', args)))
 
     self.tables[tableName] = True
+    fu = Future()
+    req.url = self.host
+    fu.set_result(HTTPResponse(req, 200, buffer=cStringIO.StringIO('OK')))
+    return fu
 
-  @gen.coroutine
-  def get(self, param, res):
+  def get(self, param, req):
     tableName = param['tableName']
     key = param['key']
     if not tableName in self.tables:
@@ -57,11 +62,9 @@ class FSMaster(object):
 
     print 'MASTER GET: {0}.{1} from {2}'.format(tableName, key, worker)
 
-    response = yield self.client.fetch(formatQuery(worker, 'get', args))
-    res.write(response.body)
+    return self.client.fetch(formatQuery(worker, 'get', args))
 
-  @gen.coroutine
-  def set(self, param, res):
+  def set(self, param, req):
     tableName = param['tableName']
     key = param['key']
     val = param['val']
@@ -75,8 +78,12 @@ class FSMaster(object):
     futures = []
     futures.append(self.client.fetch(formatQuery(worker, 'set', args)))
 
-  @gen.coroutine
-  def remove(self, param, res):
+    fu = Future()
+    req.url = self.host
+    fu.set_result(HTTPResponse(req, 200, buffer=cStringIO.StringIO('OK')))
+    return fu
+
+  def remove(self, param, req):
     tableName = param['tableName']
     key = param['key']
     if not tableName in self.tables:
@@ -89,3 +96,8 @@ class FSMaster(object):
       futures.append(self.client.fetch(formatQuery(worker, 'remove', args)))
     if key is None:
       del self.tables[tableName]
+
+    fu = Future()
+    req.url = self.host
+    fu.set_result(HTTPResponse(req, 200, buffer=cStringIO.StringIO('OK')))
+    return fu

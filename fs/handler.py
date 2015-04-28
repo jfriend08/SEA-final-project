@@ -1,4 +1,5 @@
 import tornado.web
+from tornado import gen
 
 try:
   import cPickle as pickle
@@ -16,7 +17,10 @@ class FSHandler(tornado.web.RequestHandler):
       'remove': self.processObj.remove
     }
 
+  @gen.coroutine
   def get(self):
     type = self.get_argument('type')
     param = pickle.loads(str(self.get_argument('param')))
-    self.method[type](param, self)
+    response = yield self.method[type](param, self.request)
+
+    self.write(response.body)
