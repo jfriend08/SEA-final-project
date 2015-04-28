@@ -101,6 +101,10 @@ class DisTable(object):
     param = {'tableName': self.name, 'initVal': initVal}
     self.client.fetch(formatQuery(self.master, 'create', param))
 
+  @property
+  def tableName(self):
+    return self.name
+
   '''
   Getter
   returns - any, data of this table given key
