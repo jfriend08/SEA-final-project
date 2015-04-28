@@ -34,11 +34,17 @@ class PredictionHandler(tornado.web.RequestHandler):
       else:
         for i in range(len(self.application.genres)):
           scores[i] += 0.5
-    res = []
+    res1 = []
+    res2 = []
     for i in range(len(scores)):
       scores[i] /= len(words)
+      res1.append((self.application.genres[i], scores[i]))
       if scores[i] > threshold:
-        res.append(self.application.genres[i])
-    print scores
-    res = {"status": "success", "possible_genre": res }
+        res2.append(self.application.genres[i])
+    #sorted(student_tuples, key=lambda student: student[2])
+    res1 = sorted(res1, key=lambda x:x[1], reverse=True)
+    print '===== PREDICT: '+s+' ====='
+    print res1
+    res = {"status": "success", "scores": res1 }
+    #res = {"status": "success", "possible_genres": res2 }
     self.write(json.dumps(res))
