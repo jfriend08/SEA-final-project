@@ -1,6 +1,9 @@
 # SEA-final-project
 Building up movie seach engine plus customized recommendation system
 
+#Constants output file:
+[google drive](https://drive.google.com/folderview?id=0BzG5zLRRrgKwfkFPVHE5ZUZ2WGVZM28wUXZqUzU5WmhuZ3ZFdURTMzNYNzJNeVN2T1dGWWM&usp=sharing)
+
 #Start All the works
 ##Goal: 1. find ports, 2. indexing, 3. fire up all servers
 ```python
