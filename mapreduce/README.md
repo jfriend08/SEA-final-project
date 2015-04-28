@@ -6,11 +6,9 @@ Besure to use the preset delimiter
 
 ```python
 
-import mapreduce.config.settings as settings
-
-for key in tracker.keys():
-	for term in tracker[key].keys():
-		print settings.delimiter.join([key, term, str(tracker[key][term])])
+from mapreduce.config import settings
+...
+print settings.delimiter.join([key, term, str(tracker[key][term])])
 
 ```
 
@@ -19,7 +17,7 @@ for key in tracker.keys():
 run the script and it will generate a .json file containing the workers' ip addresses
 
 ```
-$ python mapreduce/workers.py
+$ python -m mapreduce.workers
 ```
 
 ## run your mapper/reducer jobs via the framework
@@ -34,20 +32,22 @@ import tornado.ioloop
 
 mrf = framework.MapReduceFramework()
 mrf.getWorkerInfo('address.json')
-mrf.mapReduce('invertedIndex/ii_jobs', 'invertedIndex/IImapper.py', 4, 'invertedIndex/IIreducer.py')
+mrf.mapReduce('invertedIndex/ii_jobs', 'invertedIndex.IImapper', 4, 'invertedIndex.IIreducer', 'constants/invertedIndex')
 tornado.ioloop.IOLoop.instance().start()
  
 ```
 
 mapReduce() takes four arguments:
 
-1. jobPath: path to your input files
-2. mapperPath: path to your mapper
+1. inputDir: path to your input files
+2. mapperPath: path to your mapper (module)
 3. nReducers: to specify the number of output files
-4. reducerPath: path to your reducer
+4. reducerPath: path to your reducer (module)
+5. outputDir: path to your output files
 
 ```python
-def mapReduce(self, jobPath, mapperPath, nReducers, reducerPath):
+
+def mapReduce(self, inputDir, mapperPath, nReducers, reducerPath, outputDir):
 
 ```
 and it printout following information along the way

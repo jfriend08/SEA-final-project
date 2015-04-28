@@ -23,20 +23,20 @@ class MapReduceFramework:
   def taskIDtoString(self, taskIDs):
 		return ",".join(taskIDs)
 
-  def formReduceQuery(self, address, reducerIx, reducerPath, mapTaskIDs, jobPath):
-		return 'http://'+address+'/reduce?reducerIx='+str(reducerIx)+'&reducerPath='+reducerPath+'&mapTaskIDs='+mapTaskIDs+'&jobPath='+jobPath
+  def formReduceQuery(self, address, reducerIx, reducerPath, mapTaskIDs, outputDir):
+		return 'http://'+address+'/reduce?reducerIx='+str(reducerIx)+'&reducerPath='+reducerPath+'&mapTaskIDs='+mapTaskIDs+'&outputDir='+outputDir
   
   @gen.coroutine
-  def mapReduce(self, jobPath, mapperPath, nReducers, reducerPath):
+  def mapReduce(self, inputDir, mapperPath, nReducers, reducerPath, outputDir):
     if len(self.workers)==0:
       print 'workers infomation has not been set!'
       tornado.ioloop.IOLoop.current().stop()
 
 		# get all input files
     inputs = []
-    for f in os.listdir(jobPath):
+    for f in os.listdir(inputDir):
       if '.in' in f:
-        inputs.append(jobPath+'/'+f)
+        inputs.append(inputDir+'/'+f)
     print "========= input files =========="
     print inputs
 		
@@ -62,7 +62,7 @@ class MapReduceFramework:
     num = 0
     future = []
     while num < nReducers:
-      url = self.formReduceQuery(self.workers[idx%self.nMachines], num, reducerPath, taskIDs, jobPath)
+      url = self.formReduceQuery(self.workers[idx%self.nMachines], num, reducerPath, taskIDs, outputDir)
       print url
       request = tornado.httpclient.HTTPRequest(url=url, connect_timeout=80.0, request_timeout=80.0)
       response = yield tornado.gen.Task(http_client.fetch, request)
@@ -74,9 +74,3 @@ class MapReduceFramework:
 
     print "========= FINISHED! =========="
     tornado.ioloop.IOLoop.current().stop()
-
-if __name__ == "__main__":
-  mrf = MapReduceFramework()
-  mrf.getWorkerInfo('address.json')
-  mrf.mapReduce('ii_jobs', 'invertedIndex/IImapper.py', 4, 'invertedIndex/IIreducer.py')
-  tornado.ioloop.IOLoop.instance().start()

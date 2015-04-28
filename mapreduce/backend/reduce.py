@@ -10,7 +10,7 @@ import subprocess
 import os
 from heapq import merge
 # 
-from config import settings
+from ..config import settings
 
 class ReduceHandler(tornado.web.RequestHandler):
   @gen.coroutine
@@ -20,7 +20,7 @@ class ReduceHandler(tornado.web.RequestHandler):
     reducerIx = int(self.get_arguments('reducerIx')[0])
     reducerPath = self.get_arguments('reducerPath')[0]
     mapTaskIDs = self.get_arguments('mapTaskIDs')[0].split(',')
-    jobPath = self.get_arguments('jobPath')[0]
+    outputDir = self.get_arguments('outputDir')[0]
 
     # fetch data from mappers
     future = []
@@ -38,14 +38,13 @@ class ReduceHandler(tornado.web.RequestHandler):
 
     # run reducers
     inputString = '\n'.join(settings.delimiter.join(s for s in pair) for pair in data)
-    p = subprocess.Popen(reducerPath, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    p = subprocess.Popen(["python", "-m", reducerPath], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     (out, err) = p.communicate(inputString.encode('utf-8'))
 		
 		# write to file
     if out:
-      directory = jobPath+'/output'
-      if not os.path.exists(directory): os.mkdir(directory)
-      path = directory + '/' + str(reducerIx) + '.out'
+      if not os.path.exists(outputDir): os.mkdir(outputDir)
+      path = outputDir + '/' + str(reducerIx) + '.out'
       file = open(path, 'w')
       file.write(str(out))
       file.close()

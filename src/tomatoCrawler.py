@@ -21,6 +21,7 @@ from tornado.options import define, options
 # 
 # Movie_dict[movieIDs].keys() --> [u'ratings', u'links', u'title', u'critics_consensus', u'release_dates', u'abridged_cast', u'synopsis', u'mpaa_rating', u'year', u'alternate_ids', u'posters', u'runtime', u'id']
 # Review_dict[movieIDs].keys() --> [u'reviews', u'total', u'link_template', u'links']
+# Genre_dict[movieIDs].keys() --> Keys: [u'ratings', u'genres', u'studio', u'links', u'title', u'critics_consensus', u'release_dates', u'abridged_cast', u'synopsis', u'mpaa_rating', u'year', u'alternate_ids', u'posters', u'runtime', u'id', u'abridged_directors']
 #
 # To get the movie ID list:
 # 1. call IDs list, 2. call Movie_dict.keys() or Review.dict
@@ -43,6 +44,7 @@ Movies = Inv.getMovieNames()
 IDs = [] # collect return ids. Note: will be more than Movies list (e.g. will get two returns for divergent)
 Movie_dict = {} # key is movie ID, value is a dict of the movie search return
 Review_dict = {} # key is the movie ID
+Genre_dict = {} # key is the movie ID, and the value will contain the Genre info
 Movie_fs = DisTable() #Same as Movie_dict, but in FS
 Review_fs = DisTable() #Same as Review_dict, but in FS
 IDs_fs = DisList() #Save the movie IDs in FS
@@ -64,6 +66,20 @@ def _load_json_from_url(url):
     pass
 
   return json.loads(response)
+
+@gen.coroutine
+def tomatoGenreSearch():
+  global Movies, IDs, Movie_dict, Review_dict, Genre_dict  
+  for myid in IDs:    
+    toFetch = CM.GenreSearch(myid)   
+
+    data = _load_json_from_url(toFetch)   
+    time.sleep(0.5)   
+    print bcolors.OKGREEN + "Keys: %s" % data.keys() + bcolors.ENDC   
+    Genre_dict[myid] = data
+
+
+
 
 @gen.coroutine
 def tomatoMovieSearch():
@@ -156,17 +172,20 @@ def tomatoReviewSeach2FS():
 """
 Save Movie_dict and Review_dict as pickle. 
 """
-def savePickle():
-  print bcolors.HEADER + "====== Saving PICKLE ======" + bcolors.ENDC
-  fileObj = open('../constants/Movie_dict', 'w')
-  pickle.dump(Movie_dict, fileObj)
-  fileObj.close()    
+def savePickle(FullPath, mydict):
+    fileObj = open(FullPath, 'w')
+    pickle.dump(mydict, fileObj)
+    fileObj.close()    
+  # print bcolors.HEADER + "====== Saving PICKLE ======" + bcolors.ENDC
+  # fileObj = open('../constants/Movie_dict', 'w')
+  # pickle.dump(Movie_dict, fileObj)
+  # fileObj.close()    
 
-  fileObj = open('../constants/Review_dict', 'w')
-  pickle.dump(Review_dict, fileObj)
-  fileObj.close()    
-  print bcolors.OKGREEN + "Keys in Movie_dict[MovieID]\n" + bcolors.ENDC + str(Movie_dict[Movie_dict.keys()[0]].keys())
-  print bcolors.OKGREEN + "Keys in Review_dict[MovieID]\n" + bcolors.ENDC + str(Review_dict[Review_dict.keys()[0]].keys())
+  # fileObj = open('../constants/Review_dict', 'w')
+  # pickle.dump(Review_dict, fileObj)
+  # fileObj.close()    
+  # print bcolors.OKGREEN + "Keys in Movie_dict[MovieID]\n" + bcolors.ENDC + str(Movie_dict[Movie_dict.keys()[0]].keys())
+  # print bcolors.OKGREEN + "Keys in Review_dict[MovieID]\n" + bcolors.ENDC + str(Review_dict[Review_dict.keys()[0]].keys())
   
 
 
@@ -190,11 +209,22 @@ def main2NormalDict():
   print bcolors.HEADER + "====== START: tomatoReviewSeach ======" + bcolors.ENDC
   tornado.ioloop.IOLoop.current().run_sync(tomatoReviewSeach)    
 
-    
+def main2Genre():
+  global IDs, Movie_dict, Genre_dict
+  print bcolors.HEADER + "====== START: Loading Movie Dict ======" + bcolors.ENDC
+  Movie_dict = pickle.load(open('./constants/Movie_dict', 'r'))
+  IDs = list(Movie_dict.keys())
+  print bcolors.OKBLUE + "Number of IDs: " +  str(len(IDs)) + bcolors.ENDC  
+
+  print bcolors.HEADER + "====== START: Genre Seach ======" + bcolors.ENDC
+  tornado.ioloop.IOLoop.current().run_sync(tomatoGenreSearch)    
+
+  savePickle('./constants/Genre_dict', Genre_dict) #this is just for current usage
+  
 
 
-if __name__ == "__main__":        
-  main2FS()
-  # main()  
 
-
+# if __name__ == "__main__":        
+#   print "hi"
+#   # main2FS()
+#   # main2NormalDict()  
