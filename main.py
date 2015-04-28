@@ -17,7 +17,7 @@ mrf.mapReduce('constants/input', 'src.movieIndexer.mapper', 4, 'src.movieIndexer
 tornado.ioloop.IOLoop.instance().start()
 '''
 
-worker_address = 'classification/address.json'
+worker_address = 'classification/worker_address.json'
 raw_data = 'constants/Genre_dict'
 training_set = 'constants/training_set.p'
 weights_dir = 'constants/classification_weights'
