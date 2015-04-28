@@ -38,7 +38,8 @@ class FSWorker(object):
 
     fu = Future()
     req.url = self.host
-    fu.set_result(HTTPResponse(req, 200, buffer=cStringIO.StringIO(self.tables[tableName][key])))
+    fu.set_result(HTTPResponse(req, 200, 
+                               buffer=cStringIO.StringIO(pickle.dumps(self.tables[tableName][key]))))
     return fu
 
   def set(self, param, req):
