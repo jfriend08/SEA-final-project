@@ -18,22 +18,5 @@ class FSHandler(tornado.web.RequestHandler):
 
   def get(self):
     type = self.get_argument('type')
-    tableName = self.get_argument('tableName')
-
-    try:
-      key = self.get_argument('key')
-    except tornado.web.MissingArgumentError:
-      key = None
-
-    if type == 'create':
-      initVal = pickle.loads(str(self.get_argument('initVal')))
-      self.method[type](tableName, initVal)
-    elif type == 'set':
-      val = self.get_argument('val')
-      self.method[type](tableName, key, val)
-    elif type == 'get':
-      self.method[type](tableName, key, self)
-    else:
-      self.method[type](tableName, key)
-
-
+    param = pickle.loads(str(self.get_argument('param')))
+    self.method[type](param, self)

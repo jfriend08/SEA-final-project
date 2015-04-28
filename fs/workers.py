@@ -14,19 +14,28 @@ class FSWorker(object):
     self.host = host
     self.tables = {}
 
-  def create(self, tableName, initVal={}):
+  def create(self, param, res):
+    tableName = param['tableName']
+    initVal = param['initVal']
     self.tables[tableName] = {}
     for key in initVal:
-      self.tables[tableName][str(key)] = initVal[key]
+      self.tables[tableName][key] = initVal[key]
     print 'Worker {0} CREATE:'.format(self.host), self.tables[tableName]
 
-  def get(self, tableName, key, res):
-    res.write(self.tables[tableName][str(key)])
+  def get(self, param, res):
+    tableName = param['tableName']
+    key = param['key']
+    res.write(self.tables[tableName][key])
 
-  def set(self, tableName, key, val):
-   self.tables[tableName][key] = val
+  def set(self, param, res):
+    tableName = param['tableName']
+    key = param['key']
+    val = param['val']
+    self.tables[tableName][key] = val
 
-  def remove(self, tableName, key=None):
+  def remove(self, param, res):
+    tableName = param['tableName']
+    key = param['key']
     if not key in self.tables[tableName]:
       return
 
