@@ -1,2 +1,9 @@
 *pyc
 *swp
+
+
+# classification
+classification/*.json
+constants/classification_weights/*.out
+constants/training_set.p
+
