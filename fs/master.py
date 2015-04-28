@@ -13,7 +13,7 @@ Definition of Master's file system handler
 '''
 
 def formatQuery(host, type, args):
-  return '{0}/fs?type={1}&param={2}'.format(host, type, pickle.dumps(param))
+  return '{0}/fs?type={1}&param={2}'.format(host, type, pickle.dumps(args))
 
 class FSMaster(object):
   def __init__(self, workers):
@@ -51,6 +51,7 @@ class FSMaster(object):
     key = param['key']
     if not tableName in self.tables:
       raise KeyError, 'Table not found!'
+
     worker = self.workers[hash(key) % self.num_workers]
     args = {'tableName': tableName, 'key': key}
 
