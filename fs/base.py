@@ -123,7 +123,7 @@ class DisTable(object):
 
   '''
   Pop data of this key
-  param key - The position of data to be removed and returned
+  param key - The key of data to be removed and returned
   returns - AnyType, whatever value stored with key, None if there's no such value
   '''
   def pop(self, key):

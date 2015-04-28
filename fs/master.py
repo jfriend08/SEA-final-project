@@ -60,7 +60,7 @@ class FSMaster(object):
     worker = self.workers[hash(key) % self.num_workers]
     args = {'tableName': tableName, 'key': key}
 
-    print 'MASTER GET: {0}.{1} from {2}'.format(tableName, key, worker)
+    print 'MASTER -> {0} GET: {1} with key {2}'.format(worker, tableName, key)
 
     return self.client.fetch(formatQuery(worker, 'get', args))
 
@@ -73,7 +73,7 @@ class FSMaster(object):
     worker = self.workers[hash(key) % self.num_workers]
     args = {'tableName': tableName, 'key': key, 'val': val}
 
-    print 'MASTER SET: {0}.{1} with {2} to {3}'.format(tableName, key, val, worker)
+    print 'MASTER -> {0} SET: {1} with key {2} to {3}'.format(worker, tableName, key, val)
 
     futures = []
     futures.append(self.client.fetch(formatQuery(worker, 'set', args)))
