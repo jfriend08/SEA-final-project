@@ -97,8 +97,18 @@ class DisTable(object):
     #XXX: Need to use sync client
     self.client = HTTPClient()
     self.master = fs.INVENTORY.getMaster()
+    self.children = {}
+
+    #Handle if there's nested data structure
+    newInitVal = {}
+    for key in initVal:
+      if isinstance(initVal[key], dict):
+        self.children[key] = DisTable(initVal[key])
+      else:
+        newInitVal[key] = initVal[key]
+
     #Create request to master
-    param = {'tableName': self.name, 'initVal': initVal}
+    param = {'tableName': self.name, 'initVal': newInitVal}
     self.client.fetch(formatQuery(self.master, 'create', param))
 
   @property
@@ -110,6 +120,9 @@ class DisTable(object):
   returns - any, data of this table given key
   '''
   def __getitem__(self, key):
+    if key in self.children:
+      return self.children[key]
+
     param = {'tableName': self.name, 'key': key}
     res = self.client.fetch(formatQuery(self.master, 'get', param))
     return pickle.loads(res.body)
@@ -144,6 +157,7 @@ class DisTable(object):
   @property
   def length(self):
     raise NotImplementedError
-
+  '''
   def __str__(self):
     raise NotImplementedError
+  '''
