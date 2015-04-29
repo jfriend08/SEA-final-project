@@ -2,6 +2,8 @@
 
 ```
 
+# recommand system
+
 Movie_Indexer = {
   'movie-id': {
     'genre': 
@@ -30,5 +32,20 @@ Review_Indexer = {
   ],
   ...
 }
+
+# classification system
+
+Genres = ['Sports & Fitness', 'Comedy', 'Science Fiction & Fantasy', ...]
+
+Weights = {
+  'untamed' : [0.7464, 0.2837, 0.123, ...] , 
+  'dangerously' : [0.2121, 0.3321, 0.7584, ...] ,
+  ...
+}
+
+# search system
+
+
+
 
 ```
