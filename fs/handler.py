@@ -16,6 +16,7 @@ class FSHandler(tornado.web.RequestHandler):
       'set': self.processObj.set,
       'remove': self.processObj.remove,
       'append': self.processObj.append,
+      'fetch_all': self.processObj.fetch_all,
       'len': self.processObj.len
     }
 
@@ -25,4 +26,11 @@ class FSHandler(tornado.web.RequestHandler):
     param = pickle.loads(str(self.get_argument('param')))
     response = yield self.method[type](param, self.request)
 
-    self.write(response.body)
+    if isinstance(response, list):
+      ret = [pickle.loads(r.body) for r in response]
+      map = ret.pop(-1)
+      print map
+      print ret
+      self.write('')
+    else:
+      self.write(response.body)

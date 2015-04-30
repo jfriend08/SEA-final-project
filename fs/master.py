@@ -1,4 +1,4 @@
-from tornado.httpclient import AsyncHTTPClient, HTTPResponse
+from tornado.httpclient import AsyncHTTPClient, HTTPResponse, HTTPClient
 from tornado import gen
 from tornado.concurrent import TracebackFuture as Future
 import tornado.web
@@ -134,3 +134,23 @@ class FSMaster(object):
     req.url = self.host
     fu.set_result(HTTPResponse(req, 200, buffer=cStringIO.StringIO(str(self.tables[tableName]['len']))))
     return fu
+
+  def fetch_all(self, param, req):
+    tableName = param['tableName'].name
+    if not tableName in self.tables:
+      raise KeyError, 'Table not Found!'
+
+    args = {'tableName': tableName}
+    futures = []
+    for worker in self.workers:
+      futures.append(self.client.fetch(formatQuery(worker, 'fetch_all', args)))
+
+    #Pass data type map to handler in order to assembling
+    map = self.tables[tableName].copy()
+    del map['len']
+    fu = Future()
+    req.url = self.host
+    fu.set_result(HTTPResponse(req, 200, buffer=cStringIO.StringIO(pickle.dumps(map))))
+    futures.append(fu)
+
+    return futures

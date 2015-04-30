@@ -171,6 +171,10 @@ class DisTable(object):
     param = {'tableName': self.name}
     return int(HTTPClient().fetch(formatQuery(self.master, 'len', param)).body)
 
+  def fetch_all(self):
+    param = {'tableName': self.name}
+    return HTTPClient().fetch(formatQuery(self.master, 'fetch_all', param)).body
+
   #TODO: Below needs to be implemented
 
   '''
