@@ -3,7 +3,9 @@ from tornado import gen
 from tornado.concurrent import TracebackFuture as Future
 import tornado.web
 
-import cStringIO
+import cStringIO, os
+
+from base import TableName, DisTable
 
 try:
   import cPickle as pickle
@@ -26,7 +28,7 @@ class FSMaster(object):
     self.client = AsyncHTTPClient()
 
   def create(self, param, req):
-    tableName = param['tableName']
+    tableName = param['tableName'].name
     initVal = param['initVal']
     if tableName in self.tables:
       raise KeyError, 'Table name already existed'
@@ -37,8 +39,14 @@ class FSMaster(object):
     for worker_id in xrange(self.num_workers):
       vals[worker_id] = {}
     for key in initVal:
-      worker = hash(key) % self.num_workers
-      vals[worker][key] = initVal[key]
+      if isinstance(initVal[key], dict):
+        newUid = os.fork()
+        if newUid == 0:
+          newTable = DisTable(initVal[key])
+          os._exit(0)
+      else:
+        worker = hash(key) % self.num_workers
+        vals[worker][key] = initVal[key]
 
     futures = []
     for worker_id in xrange(self.num_workers):
@@ -52,7 +60,7 @@ class FSMaster(object):
     return fu
 
   def get(self, param, req):
-    tableName = param['tableName']
+    tableName = param['tableName'].name
     key = param['key']
     if not tableName in self.tables:
       raise KeyError, 'Table not found!'

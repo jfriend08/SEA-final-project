@@ -21,6 +21,7 @@ class FSHandler(tornado.web.RequestHandler):
   def get(self):
     type = self.get_argument('type')
     param = pickle.loads(str(self.get_argument('param')))
+    print 'Handler TEST'
     response = yield self.method[type](param, self.request)
 
     self.write(response.body)

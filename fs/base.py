@@ -1,5 +1,5 @@
 import uuid
-from tornado.httpclient import HTTPClient
+from tornado.httpclient import HTTPClient, AsyncHTTPClient
 from tornado import gen
 
 import fs
@@ -25,6 +25,14 @@ def prettyPrint(dic, indent):
       ret += formatEntry(value, indent+1)
 
   return ret
+
+class TableName(object):
+  def __init__(self, name):
+    self.tableName = name
+
+  @property
+  def name(self):
+    return self.tableName
 
 '''
 Distributed list Object
@@ -93,22 +101,14 @@ Distributed table Object
 '''
 class DisTable(object):
   def __init__(self, initVal={}):
-    self.name = uuid.uuid4().hex
+    self.name = TableName(uuid.uuid4().hex)
     #XXX: Need to use sync client
     self.client = HTTPClient()
     self.master = fs.INVENTORY.getMaster()
-    self.children = {}
-
-    #Handle if there's nested data structure
-    newInitVal = {}
-    for key in initVal:
-      if isinstance(initVal[key], dict):
-        self.children[key] = DisTable(initVal[key])
-      else:
-        newInitVal[key] = initVal[key]
 
     #Create request to master
-    param = {'tableName': self.name, 'initVal': newInitVal}
+    param = {'tableName': self.name, 'initVal': initVal}
+    print 'DisTable CREATE'
     self.client.fetch(formatQuery(self.master, 'create', param))
 
   @property
