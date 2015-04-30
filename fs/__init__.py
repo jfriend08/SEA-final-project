@@ -3,6 +3,8 @@ from handler import FSHandler
 from master import FSMaster
 from workers import FSWorker
 
+from tornado.httpclient import HTTPClient, AsyncHTTPClient
+
 from .constants import Inventory
 
 INVENTORY = None
@@ -33,3 +35,4 @@ def shutDown():
     INVENTORY.clearInfo()
 
 INVENTORY = Inventory()
+

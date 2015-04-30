@@ -100,16 +100,24 @@ class DisList(object):
 Distributed table Object
 '''
 class DisTable(object):
-  def __init__(self, initVal={}):
-    self.name = TableName(uuid.uuid4().hex)
-    #XXX: Need to use sync client
-    self.client = HTTPClient()
+  def __init__(self, initVal={}, tableName=None):
+    if tableName is None:
+      self.name = TableName(uuid.uuid4().hex)
+    else:
+      self.name = TableName(tableName)
     self.master = fs.INVENTORY.getMaster()
 
+    newInitVal = {}
+    for key in initVal:
+      if isinstance(initVal[key], dict):
+        newInitVal[key] = DisTable(initVal[key])
+      else:
+        newInitVal[key] = initVal[key]
+
     #Create request to master
-    param = {'tableName': self.name, 'initVal': initVal}
-    print 'DisTable CREATE'
-    self.client.fetch(formatQuery(self.master, 'create', param))
+    if len(newInitVal.keys()) > 0:
+      param = {'tableName': self.name, 'initVal': newInitVal}
+      HTTPClient().fetch(formatQuery(self.master, 'create', param))
 
   @property
   def tableName(self):
@@ -120,11 +128,8 @@ class DisTable(object):
   returns - any, data of this table given key
   '''
   def __getitem__(self, key):
-    if key in self.children:
-      return self.children[key]
-
     param = {'tableName': self.name, 'key': key}
-    res = self.client.fetch(formatQuery(self.master, 'get', param))
+    res = HTTPClient().fetch(formatQuery(self.master, 'get', param))
     return pickle.loads(res.body)
 
   '''
@@ -134,7 +139,7 @@ class DisTable(object):
   '''
   def __setitem__(self, key, val):
     param = {'tableName': self.name, 'key': key, 'val': val}
-    return self.client.fetch(formatQuery(self.master, 'set', param)).body
+    return HTTPClient().fetch(formatQuery(self.master, 'set', param)).body
 
   #TODO: Below needs to be implemented
 

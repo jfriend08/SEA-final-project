@@ -39,14 +39,8 @@ class FSMaster(object):
     for worker_id in xrange(self.num_workers):
       vals[worker_id] = {}
     for key in initVal:
-      if isinstance(initVal[key], dict):
-        newUid = os.fork()
-        if newUid == 0:
-          newTable = DisTable(initVal[key])
-          os._exit(0)
-      else:
-        worker = hash(key) % self.num_workers
-        vals[worker][key] = initVal[key]
+      worker = hash(key) % self.num_workers
+      vals[worker][key] = initVal[key]
 
     futures = []
     for worker_id in xrange(self.num_workers):
