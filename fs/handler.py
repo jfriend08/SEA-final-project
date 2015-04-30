@@ -14,7 +14,9 @@ class FSHandler(tornado.web.RequestHandler):
       'create': self.processObj.create,
       'get': self.processObj.get,
       'set': self.processObj.set,
-      'remove': self.processObj.remove
+      'remove': self.processObj.remove,
+      'append': self.processObj.append,
+      'len': self.processObj.len
     }
 
   @gen.coroutine
