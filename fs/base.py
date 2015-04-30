@@ -34,10 +34,13 @@ class TableName(object):
   def name(self):
     return self.tableName
 
+class DisObj(object):
+  pass
+
 '''
 Distributed list Object
 '''
-class DisList(object):
+class DisList(DisObj):
   def __init__(self, initVal=[], tableName=None):
     if tableName is None:
       self.name = TableName(uuid.uuid4().hex)
@@ -128,7 +131,7 @@ class DisList(object):
 '''
 Distributed table Object
 '''
-class DisTable(object):
+class DisTable(DisObj):
   def __init__(self, initVal={}, tableName=None):
     if tableName is None:
       self.name = TableName(uuid.uuid4().hex)
@@ -140,6 +143,8 @@ class DisTable(object):
     for key in initVal:
       if isinstance(initVal[key], dict):
         newInitVal[key] = DisTable(initVal[key])
+      elif isinstance(initVal[key], list):
+        newInitVal[key] = DisList(initVal[key])
       else:
         newInitVal[key] = initVal[key]
 
@@ -147,6 +152,9 @@ class DisTable(object):
     if len(newInitVal.keys()) > 0:
       param = {'tableName': self.name, 'initVal': newInitVal}
       HTTPClient().fetch(formatQuery(self.master, 'create', param))
+
+  def getName(self):
+    return self.name
 
   '''
   Getter
@@ -173,7 +181,18 @@ class DisTable(object):
 
   def fetch_all(self):
     param = {'tableName': self.name}
-    return HTTPClient().fetch(formatQuery(self.master, 'fetch_all', param)).body
+    client = HTTPClient()
+    responses = pickle.loads(client.fetch(formatQuery(self.master, 'fetch_all', param)).body)
+
+    ret = {}
+    for val in responses:
+      ret.update(val)
+
+    for key in ret:
+      if isinstance(ret[key], DisObj):
+        ret[key] = ret[key].fetch_all()
+
+    return ret
 
   #TODO: Below needs to be implemented
 

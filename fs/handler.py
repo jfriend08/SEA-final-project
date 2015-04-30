@@ -28,9 +28,7 @@ class FSHandler(tornado.web.RequestHandler):
 
     if isinstance(response, list):
       ret = [pickle.loads(r.body) for r in response]
-      map = ret.pop(-1)
-      print map
-      print ret
-      self.write('')
+      print ret[0]
+      self.write(pickle.dumps(ret))
     else:
       self.write(response.body)

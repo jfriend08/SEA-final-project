@@ -145,12 +145,4 @@ class FSMaster(object):
     for worker in self.workers:
       futures.append(self.client.fetch(formatQuery(worker, 'fetch_all', args)))
 
-    #Pass data type map to handler in order to assembling
-    map = self.tables[tableName].copy()
-    del map['len']
-    fu = Future()
-    req.url = self.host
-    fu.set_result(HTTPResponse(req, 200, buffer=cStringIO.StringIO(pickle.dumps(map))))
-    futures.append(fu)
-
     return futures
