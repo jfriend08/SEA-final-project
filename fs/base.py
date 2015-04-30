@@ -1,5 +1,5 @@
 import uuid
-from tornado.httpclient import HTTPClient
+from tornado.httpclient import HTTPClient, AsyncHTTPClient
 from tornado import gen
 
 import fs
@@ -26,22 +26,47 @@ def prettyPrint(dic, indent):
 
   return ret
 
+class TableName(object):
+  def __init__(self, name):
+    self.tableName = name
+
+  @property
+  def name(self):
+    return self.tableName
+
 '''
 Distributed list Object
 '''
 class DisList(object):
-  def __init__(self, initVal=None):
-    if initVal:
-      self.data = initVal
+  def __init__(self, initVal=[], tableName=None):
+    if tableName is None:
+      self.name = TableName(uuid.uuid4().hex)
     else:
-      self.data = []
+      self.name = TableName(tableName)
+    self.master = fs.INVENTORY.getMaster()
+
+    newInitVal = {}
+    for idx in xrange(len(initVal)):
+      if isinstance(initVal[idx], dict):
+        newInitVal[idx] = DisTable(initVal[idx])
+      elif isinstance(initVal[idx], list):
+        newInitVal[idx] = DisList(initVal[idx])
+      else:
+        newInitVal[idx] = initVal[idx]
+
+    #Create request to master
+    if len(newInitVal.keys()) > 0:
+      param = {'tableName': self.name, 'initVal': newInitVal}
+      HTTPClient().fetch(formatQuery(self.master, 'create', param))
 
   '''
   Getter
   returns - any, data of this list given idx
   '''
   def __getitem__(self, idx):
-    return self.data[idx]
+    param = {'tableName': self.name, 'key': idx}
+    res = HTTPClient().fetch(formatQuery(self.master, 'get', param))
+    return pickle.loads(res.body)
 
   '''
   Setter
@@ -49,21 +74,42 @@ class DisList(object):
   param val - any, value to be updated
   '''
   def __setitem__(self, idx, val):
-    self.data[idx] = val
+    param = {'tableName': self.name, 'key': idx, 'val': val}
+    return HTTPClient().fetch(formatQuery(self.master, 'set', param)).body
 
   '''
   Append val into the last position of list
   param val - any, value to be appended
+  returns - int, idx of appended position
   '''
   def append(self, val):
-    self.data.append(val)
+    if isinstance(val, list):
+      newVal = DisList(val)
+    elif isinstance(val, dict):
+      newVal = DistTable(val)
+    else:
+      newVal = val
 
+    param = {'tableName': self.name, 'val': newVal}
+    return int(HTTPClient().fetch(formatQuery(self.master, 'append', param)).body)
   '''
   Extend the list with new val
   param val - any, value to be extended into list
   '''
   def extend(self, val):
-    self.data.extend(val)
+    ret = 0
+    if isinstance(val, list):
+      for v in val:
+        ret = self.append(v)
+    else:
+      ret = self.append(val)
+
+    return ret
+
+  @property
+  def length(self):
+    param = {'tableName': self.name}
+    return int(HTTPClient().fetch(formatQuery(self.master, 'len', param)).body)
 
   '''
   Remove given value in the list
@@ -72,38 +118,35 @@ class DisList(object):
                 operation is a global remove or just remove first value in list
   '''
   def remove(self, val, globl=False):
-    if globl:
-      while val in self.data:
-        self.data.remove(val)
-    else:
-      self.data.remove(val)
+    raise NotImplementedError
 
-  @property
-  def length(self):
-    return len(self.data)
-
+  '''
   def __str__(self):
-    ret = '['
-    for i in xrange(len(self.data)):
-      ret += ' {0} '.format(str(self.data[i]))
-    return ret + ']'
+    raise NotImplementedError
+  '''
 
 '''
 Distributed table Object
 '''
 class DisTable(object):
-  def __init__(self, initVal={}):
-    self.name = uuid.uuid4().hex
-    #XXX: Need to use sync client
-    self.client = HTTPClient()
+  def __init__(self, initVal={}, tableName=None):
+    if tableName is None:
+      self.name = TableName(uuid.uuid4().hex)
+    else:
+      self.name = TableName(tableName)
     self.master = fs.INVENTORY.getMaster()
-    #Create request to master
-    param = {'tableName': self.name, 'initVal': initVal}
-    self.client.fetch(formatQuery(self.master, 'create', param))
 
-  @property
-  def tableName(self):
-    return self.name
+    newInitVal = {}
+    for key in initVal:
+      if isinstance(initVal[key], dict):
+        newInitVal[key] = DisTable(initVal[key])
+      else:
+        newInitVal[key] = initVal[key]
+
+    #Create request to master
+    if len(newInitVal.keys()) > 0:
+      param = {'tableName': self.name, 'initVal': newInitVal}
+      HTTPClient().fetch(formatQuery(self.master, 'create', param))
 
   '''
   Getter
@@ -111,7 +154,7 @@ class DisTable(object):
   '''
   def __getitem__(self, key):
     param = {'tableName': self.name, 'key': key}
-    res = self.client.fetch(formatQuery(self.master, 'get', param))
+    res = HTTPClient().fetch(formatQuery(self.master, 'get', param))
     return pickle.loads(res.body)
 
   '''
@@ -121,7 +164,12 @@ class DisTable(object):
   '''
   def __setitem__(self, key, val):
     param = {'tableName': self.name, 'key': key, 'val': val}
-    return self.client.fetch(formatQuery(self.master, 'set', param)).body
+    return HTTPClient().fetch(formatQuery(self.master, 'set', param)).body
+
+  @property
+  def length(self):
+    param = {'tableName': self.name}
+    return int(HTTPClient().fetch(formatQuery(self.master, 'len', param)).body)
 
   #TODO: Below needs to be implemented
 
@@ -141,9 +189,7 @@ class DisTable(object):
   def hasKey(self, key):
     raise NotImplementedError
 
-  @property
-  def length(self):
-    raise NotImplementedError
-
+  '''
   def __str__(self):
     raise NotImplementedError
+  '''

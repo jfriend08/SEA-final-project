@@ -3,7 +3,9 @@ from tornado import gen
 from tornado.concurrent import TracebackFuture as Future
 import tornado.web
 
-import cStringIO
+import cStringIO, os
+
+from base import TableName, DisTable
 
 try:
   import cPickle as pickle
@@ -26,17 +28,21 @@ class FSMaster(object):
     self.client = AsyncHTTPClient()
 
   def create(self, param, req):
-    tableName = param['tableName']
+    tableName = param['tableName'].name
     initVal = param['initVal']
     if tableName in self.tables:
       raise KeyError, 'Table name already existed'
 
     print 'MASTER CREATE:', initVal
-
+    self.tables[tableName] = {'len': 0, }
+    #Data Partition
     vals = {}
     for worker_id in xrange(self.num_workers):
       vals[worker_id] = {}
     for key in initVal:
+      #Bookkeeping
+      self.tables[tableName]['len'] += 1
+      self.tables[tableName][key] = type(initVal[key])
       worker = hash(key) % self.num_workers
       vals[worker][key] = initVal[key]
 
@@ -45,14 +51,13 @@ class FSMaster(object):
       args = {'tableName': tableName, 'initVal': vals[worker_id]}
       futures.append(self.client.fetch(formatQuery(self.workers[worker_id], 'create', args)))
 
-    self.tables[tableName] = True
     fu = Future()
     req.url = self.host
     fu.set_result(HTTPResponse(req, 200, buffer=cStringIO.StringIO('OK')))
     return fu
 
   def get(self, param, req):
-    tableName = param['tableName']
+    tableName = param['tableName'].name
     key = param['key']
     if not tableName in self.tables:
       raise KeyError, 'Table not found!'
@@ -65,7 +70,7 @@ class FSMaster(object):
     return self.client.fetch(formatQuery(worker, 'get', args))
 
   def set(self, param, req):
-    tableName = param['tableName']
+    tableName = param['tableName'].name
     key = param['key']
     val = param['val']
     if not tableName in self.tables:
@@ -84,7 +89,7 @@ class FSMaster(object):
     return fu
 
   def remove(self, param, req):
-    tableName = param['tableName']
+    tableName = param['tableName'].name
     key = param['key']
     if not tableName in self.tables:
       #Silently fails
@@ -100,4 +105,32 @@ class FSMaster(object):
     fu = Future()
     req.url = self.host
     fu.set_result(HTTPResponse(req, 200, buffer=cStringIO.StringIO('OK')))
+    return fu
+
+  def append(self, param, req):
+    tableName = param['tableName'].name
+    val = param['val']
+    if not tableName in self.tables:
+      raise KeyError, 'Table Not Found!'
+
+    args = {'tableName': tableName, 'key': self.tables[tableName]['len'], 'val': val}
+    worker = self.workers[hash(self.tables[tableName]['len']) % self.num_workers]
+
+    print 'MASTER -> {0} Append: {1} to key {2}'.format(worker, val, self.tables[tableName]['len'])
+    self.client.fetch(formatQuery(worker, 'set', args))
+
+    fu = Future()
+    req.url = self.host
+    fu.set_result(HTTPResponse(req, 200, buffer=cStringIO.StringIO(str(self.tables[tableName]['len']))))
+    self.tables[tableName]['len'] += 1
+    return fu
+
+  def len(self, param, req):
+    tableName = param['tableName'].name
+    if not tableName in self.tables:
+      raise KeyError, 'Table Not Found'
+
+    fu = Future()
+    req.url = self.host
+    fu.set_result(HTTPResponse(req, 200, buffer=cStringIO.StringIO(str(self.tables[tableName]['len']))))
     return fu

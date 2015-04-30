@@ -46,6 +46,9 @@ class FSWorker(object):
     tableName = param['tableName']
     key = param['key']
     val = param['val']
+
+    print 'Worker {0} SET: {1} with key {2} to {3}'.format(self.host, tableName, key, val)
+
     self.tables[tableName][key] = val
 
     fu = Future()
@@ -69,3 +72,8 @@ class FSWorker(object):
     fu.set_result(HTTPResponse(req, 200, buffer=cStringIO.StringIO('OK')))
     return Future().set_result('OK')
 
+  def append(self, param, req):
+    pass
+
+  def len(self):
+    pass
