@@ -114,6 +114,25 @@ class DisList(DisObj):
     param = {'tableName': self.name}
     return int(HTTPClient().fetch(formatQuery(self.master, 'len', param)).body)
 
+  def fetch_all(self):
+    param = {'tableName': self.name}
+    client = HTTPClient()
+    responses = pickle.loads(client.fetch(formatQuery(self.master, 'fetch_all', param)).body)
+
+    dic = {}
+    for val in responses:
+      dic.update(val)
+
+    ret = [(k, dic[k]) for k in dic]
+    sorted(ret, lambda x, y: x[0] > y[0])
+    ret = [x[1] for x in ret]
+
+    for idx in xrange(len(ret)):
+      if isinstance(ret[idx], DisObj):
+        ret[idx] = ret[idx].fetch_all()
+
+    return ret
+
   '''
   Remove given value in the list
   param val - any, the value to be removed from list
