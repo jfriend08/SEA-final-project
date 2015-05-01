@@ -61,10 +61,10 @@ ClassifierServer = []
 
 NumSuperFront = 1 #the most frontend server to user
 NumMaster = 2 #the masterServer for 1. Search Engine 2. Recommendation System
-NumMovie = 2 #for recommendation system
-NumReview = 2 #for recommendation system
-NumIdx = 2 #for search engine
-NumDoc = 2 #for search engine
+NumMovie = 3 #for recommendation system
+NumReview = 3 #for recommendation system
+NumIdx = 3 #for search engine
+NumDoc = 3 #for search engine
 NumClassifier = 4 #for classifier
 
 
@@ -72,6 +72,7 @@ def getPorts():
   global SuperFront, masterServer, MovieServer, ReviewServer, IdxServer, DocServer, Baseport, ClassifierServer
   from recommendation import inventory  
   guessPort = 27375 #will start with this port and find the avaliable ports
+  # guessPort = 28300 #will start with this port and find the avaliable ports
   allserver = inventory.Inventory()
   Baseport = allserver.callBasePort(guessPort)
   allserver.findPorts( socket.gethostname(), NumSuperFront, NumMaster, NumMovie, NumReview, NumIdx, NumDoc, NumClassifier, Baseport)
@@ -81,13 +82,19 @@ def getPorts():
 
 def main():
   from recommendation import recom_worker, recom_front
-  from recommendation import searchEng_worker, searchEng_front  
+  from searchEngine.backend import back as searchEng_worker
+  from searchEngine.frontend import front as searchEng_front
+  # from recommendation import searchEng_worker, searchEng_front  
   from src import localIndexer
-  from src import color
+  from src import color  
+  # from src import tomatoCrawler as TC
   C = color.bcolors()
 
   global masterServer, MovieServer, ReviewServer, IdxServer, DocServer, Baseport
   
+  print C.HEADER + "=========== Start Crawling ===========" + C.ENDC
+  # TC.main2Genre()
+
   print C.HEADER + "=========== Find Available Ports ===========" + C.ENDC
   getPorts()
 
@@ -100,11 +107,12 @@ def main():
   print C.OKBLUE + "ClassifierServer:\t" + str(ClassifierServer) + C.ENDC
   
   print C.HEADER + "=========== Start Local Indexing ===========" + C.ENDC
-  localIndexer.ReviewIndexing()
+  # localIndexer.ReviewIndexing()
 
   print C.HEADER + "=========== Fire Up All Servers ===========" + C.ENDC
   uid = fork_processes(NumMaster+NumMovie+NumReview+NumIdx+NumDoc)
   # uid = fork_processes(NumMaster+NumMovie+NumReview+NumIdx+NumDoc)
+  
   if uid == 0:
     sockets = bind_sockets(masterServer[uid].split(':')[-1])
     myfront = recom_front.FrontEndApp(MovieServer, ReviewServer)
@@ -127,12 +135,12 @@ def main():
   elif uid < NumMaster + NumMovie + NumReview + NumIdx:
       myIdx = uid-NumMovie-NumReview-NumMaster
       sockets = bind_sockets(IdxServer[myIdx].split(':')[-1])    
-      myback_idx = searchEng_worker.RecommApp('IndexServer', myIdx, IdxServer[myIdx].split(':')[-1])
+      myback_idx = searchEng_worker.BackEndApp('IndexServer', myIdx, IdxServer[myIdx].split(':')[-1])
       server  = myback_idx.app
   elif uid < NumMaster + NumMovie + NumReview + NumIdx + NumDoc:
       myIdx = uid-NumMovie-NumReview-NumIdx-NumMaster
       sockets = bind_sockets(DocServer[myIdx].split(':')[-1])    
-      myback_doc = searchEng_worker.RecommApp('DocumentServer', myIdx, DocServer[myIdx].split(':')[-1])
+      myback_doc = searchEng_worker.BackEndApp('DocServer', myIdx, DocServer[myIdx].split(':')[-1])
       server  = myback_doc.app
 
   server.add_sockets(sockets)
