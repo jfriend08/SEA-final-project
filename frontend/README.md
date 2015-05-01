@@ -1,6 +1,6 @@
-## Frontend Server
+# Frontend Server
 
-# backend server info
+## backend server info
 
 create a json file "worker_info.json" into frontend/config and its content should be like:
 
@@ -13,7 +13,7 @@ create a json file "worker_info.json" into frontend/config and its content shoul
 
 ```
 
-# install google cloud sdk
+## install google cloud sdk
 
 https://cloud.google.com/sdk/#Quick_Start
 
@@ -22,14 +22,14 @@ $ curl https://sdk.cloud.google.com | bash
 
 ```
 
-# start the frontend server
+## start the frontend server
 
 ```
 $ dev_appserver.py --host=localhost --port=8080 frontend
 
 ```
 
-# will send three kinds of http request to our backend servers
+## will send three kinds of http request to our backend servers
 
 ```python
 
