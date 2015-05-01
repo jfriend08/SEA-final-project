@@ -74,7 +74,7 @@ def tomatoGenreSearch():
     toFetch = CM.GenreSearch(myid)   
 
     data = _load_json_from_url(toFetch)   
-    time.sleep(0.5)   
+    time.sleep(0.3)   
     print bcolors.OKGREEN + "Keys: %s" % data.keys() + bcolors.ENDC   
     Genre_dict[myid] = data
 
@@ -95,7 +95,7 @@ def tomatoMovieSearch():
         Movie_dict[data['movies'][i]['id']] = data['movies'][i]
       except:
         pass
-    time.sleep(0.5) #tomato server will not happy if you fetch too fast
+    time.sleep(0.3) #tomato server will not happy if you fetch too fast
 
 """
 this is same method as tomatoMovieSearch, but save the Movie_dict to file system
@@ -117,7 +117,7 @@ def tomatoMovieSearch2FS():
       
       except:
         pass
-    time.sleep(0.5) #tomato server will not happy if you fetch too fast
+    time.sleep(0.3) #tomato server will not happy if you fetch too fast
 
 @gen.coroutine
 def tomatoReviewSeach():
@@ -126,7 +126,7 @@ def tomatoReviewSeach():
     pageNum=1
     toFetch = CM.ReviewSearch(myid,pageNum)   
     data = _load_json_from_url(toFetch)   
-    time.sleep(1)   
+    time.sleep(0.3)   
     print bcolors.OKGREEN + "MovieID:\t%s\tTitle:\t%s\tTotal Reviews:\t%d" %(myid, Movie_dict[myid]['title'], data['total']) + bcolors.ENDC   
     
     #API only provide 50 reviews per page, so fetching more pages if total review is more than 50
@@ -137,7 +137,7 @@ def tomatoReviewSeach():
         toFetch = CM.ReviewSearch(myid,pageNum)   
         new_data= _load_json_from_url(toFetch)
         data['reviews'].extend(new_data['reviews'])               
-        time.sleep(0.5) #tomato server will not happy if you fetch too fast
+        time.sleep(0.3) #tomato server will not happy if you fetch too fast
     
     Review_dict[myid] = data
 
@@ -153,7 +153,7 @@ def tomatoReviewSeach2FS():
     pageNum=1
     toFetch = CM.ReviewSearch(myid,pageNum)   
     data = _load_json_from_url(toFetch)   
-    time.sleep(1)   
+    time.sleep(0.3)   
     print bcolors.OKGREEN + "MovieID:\t%s\tTitle:\t%s\tTotal Reviews:\t%d" %(myid, Movie_dict[myid]['title'], data['total']) + bcolors.ENDC   
     
     #API only provide 50 reviews per page, so fetching more pages if total review is more than 50
@@ -164,7 +164,7 @@ def tomatoReviewSeach2FS():
         toFetch = CM.ReviewSearch(myid,pageNum)   
         new_data= _load_json_from_url(toFetch)
         data['reviews'].extend(new_data['reviews'])               
-        time.sleep(0.5) #tomato server will not happy if you fetch too fast
+        time.sleep(0.3) #tomato server will not happy if you fetch too fast
     
     Review_dict[myid] = data
     Review_fs[myid] = data
@@ -202,12 +202,19 @@ def main2FS():
 
 
 def main2NormalDict():  
-  print bcolors.HEADER + "====== START: tomatoMovieSearch ======" + bcolors.ENDC
-  tornado.ioloop.IOLoop.current().run_sync(tomatoMovieSearch)  
-  print bcolors.OKBLUE + "Number of IDs: " +  str(len(IDs)) + bcolors.ENDC  
+  print Movies
+  # print bcolors.HEADER + "====== START: tomatoMovieSearch ======" + bcolors.ENDC
+  # tornado.ioloop.IOLoop.current().run_sync(tomatoMovieSearch)  
+  # print bcolors.OKBLUE + "Number of IDs: " +  str(len(IDs)) + bcolors.ENDC  
+  # savePickle('../constants/Movie_dictII', Movie_dict) #this is just for current usage  
   
-  print bcolors.HEADER + "====== START: tomatoReviewSeach ======" + bcolors.ENDC
-  tornado.ioloop.IOLoop.current().run_sync(tomatoReviewSeach)    
+  # print bcolors.HEADER + "====== START: tomatoReviewSeach ======" + bcolors.ENDC  
+  # tornado.ioloop.IOLoop.current().run_sync(tomatoReviewSeach)    
+  # savePickle('../constants/Review_dictII', Review_dict) #this is just for current usage
+
+  # print bcolors.HEADER + "====== START: Genre Seach ======" + bcolors.ENDC
+  # tornado.ioloop.IOLoop.current().run_sync(tomatoGenreSearch)    
+  # savePickle('../constants/Genre_dict', Genre_dict) #this is just for current usage
 
 def main2Genre():
   global IDs, Movie_dict, Genre_dict
@@ -224,7 +231,8 @@ def main2Genre():
 
 
 
-# if __name__ == "__main__":        
+if __name__ == "__main__":        
+  main2NormalDict() 
 #   print "hi"
 #   # main2FS()
-#   # main2NormalDict()  
+  
