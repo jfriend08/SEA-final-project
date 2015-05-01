@@ -15,7 +15,7 @@ class PredictionHandler(tornado.web.RequestHandler):
   @gen.coroutine
   def get(self):
     description = self.get_arguments('description')[0]
-    threshold = float(self.get_arguments('threshold')[0])
+    #threshold = float(self.get_arguments('threshold')[0])
     # trim the data
     s = str(description)
     s = s.translate(string.maketrans("",""), string.punctuation)
@@ -35,12 +35,11 @@ class PredictionHandler(tornado.web.RequestHandler):
         for i in range(len(self.application.genres)):
           scores[i] += 0.5
     res1 = []
-    res2 = []
+    #res2 = []
     for i in range(len(scores)):
       scores[i] /= len(words)
       res1.append((self.application.genres[i], scores[i]))
-      if scores[i] > threshold:
-        res2.append(self.application.genres[i])
+      #if scores[i] > threshold: res2.append(self.application.genres[i])
     #sorted(student_tuples, key=lambda student: student[2])
     res1 = sorted(res1, key=lambda x:x[1], reverse=True)
     print '===== PREDICT: '+s+' ====='
