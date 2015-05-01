@@ -82,9 +82,11 @@ def getPorts():
 
 def main():
   from recommendation import recom_worker, recom_front
-  from recommendation import searchEng_worker, searchEng_front  
+  from searchEngine.backend import back as searchEng_worker
+  from searchEngine.frontend import front as searchEng_front
+  # from recommendation import searchEng_worker, searchEng_front  
   from src import localIndexer
-  from src import color
+  from src import color  
   # from src import tomatoCrawler as TC
   C = color.bcolors()
 
@@ -133,12 +135,12 @@ def main():
   elif uid < NumMaster + NumMovie + NumReview + NumIdx:
       myIdx = uid-NumMovie-NumReview-NumMaster
       sockets = bind_sockets(IdxServer[myIdx].split(':')[-1])    
-      myback_idx = searchEng_worker.RecommApp('IndexServer', myIdx, IdxServer[myIdx].split(':')[-1])
+      myback_idx = searchEng_worker.BackEndApp('IndexServer', myIdx, IdxServer[myIdx].split(':')[-1])
       server  = myback_idx.app
   elif uid < NumMaster + NumMovie + NumReview + NumIdx + NumDoc:
       myIdx = uid-NumMovie-NumReview-NumIdx-NumMaster
       sockets = bind_sockets(DocServer[myIdx].split(':')[-1])    
-      myback_doc = searchEng_worker.RecommApp('DocumentServer', myIdx, DocServer[myIdx].split(':')[-1])
+      myback_doc = searchEng_worker.BackEndApp('DocServer', myIdx, DocServer[myIdx].split(':')[-1])
       server  = myback_doc.app
 
   server.add_sockets(sockets)
