@@ -72,6 +72,16 @@ class FSWorker(object):
     fu.set_result(HTTPResponse(req, 200, buffer=cStringIO.StringIO('OK')))
     return Future().set_result('OK')
 
+  def fetch_all(self, param, req):
+    tableName = param['tableName']
+    if not tableName in self.tables:
+      raise KeyError, 'Table Not Found!'
+
+    fu = Future()
+    req.url = self.host
+    fu.set_result(HTTPResponse(req, 200, buffer=cStringIO.StringIO(pickle.dumps(self.tables[tableName]))))
+    return fu
+
   def append(self, param, req):
     pass
 
