@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <title>Movie Search Engine</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+  </head>
+
+  <body>
+    <div class="page-wrapper">
+      <!-- header -->
+      <header>
+        <nav class="navbar navbar-default" role="navigation">
+          <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+              <a class="navbar-brand" href="/">Movie Search Engine</a>
+            </div>
+            <div style="float:right">
+            {% if user  %}
+              <a class="navbar-brand" href="{{ link }}">{{user.nickname()}}</a>
+            {% else %}
+              <a class="navbar-brand" href="{{ link }}">Login</a>
+            {% endif %}
+            </div>
+          </div><!-- /.container-fluid -->          
+        </nav>
+      </header>
+      <br>
+      {% block main %}
+      {% endblock main %}
+    </div>
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+  </body>
+
+</html>
+{% endautoescape %}
