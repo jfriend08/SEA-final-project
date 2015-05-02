@@ -5,32 +5,33 @@
 # recommand system
 
 Movie_Indexer = {
-  'movie-id': {
-    'genre': 
-    [
-      'genre1', 'genre2',...
-    ]
-    ,
-    'reviews':
-    [
+  key: movie-id
+  value:[
       [
         'reviewer1',
         'rating1',
         'quote1'
-      ],
-      ...
+      ],...
     ]
-  }
 }
 
 Review_Indexer = {
-  'critic' : [
+  key: 'critic'
+  value:
+  [
     [
       'movid-id',
       'rating'
-    ]
-  ],
-  ...
+    ], ...
+  ]
+}
+
+Genre_Indexer = {
+  key: movie
+  value: [
+    genre1,
+    genre2,...
+  ]
 }
 
 # classification system
