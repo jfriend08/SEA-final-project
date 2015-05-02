@@ -6,6 +6,9 @@ for line in sys.stdin:
   kvPair = line.split(settings.delimiter, 1)
   key = kvPair[0]
   value = eval(kvPair[1])
-  indexer[key] = value
+  try:
+    indexer[key].append(value)
+  except:
+    indexer[key] = [ value ]
 print pickle.dumps(indexer)
 
