@@ -85,7 +85,7 @@ def main():
   from searchEngine.backend import back as searchEng_worker
   from searchEngine.frontend import front as searchEng_front
   # from recommendation import searchEng_worker, searchEng_front  
-  from src import localIndexer
+  import mapreduce.framework as framework
   from src import color  
   # from src import tomatoCrawler as TC
   C = color.bcolors()
@@ -106,13 +106,35 @@ def main():
   print C.OKBLUE + "DocServer:\t" + str(DocServer) + C.ENDC
   print C.OKBLUE + "ClassifierServer:\t" + str(ClassifierServer) + C.ENDC
   
-  print C.HEADER + "=========== Start Local Indexing ===========" + C.ENDC
+  print C.HEADER + "=========== Instantiate MapReduceFramework ===========" + C.ENDC
+  
+  mrf = framework.MapReduceFramework()
+  mrf.getWorkerInfo('address.json')
+  
+
+  #print C.HEADER + "=========== Start Local Indexing ===========" + C.ENDC
   # localIndexer.ReviewIndexing()
+  
+  print C.HEADER + "=========== Start Indexing Movies ===========" + C.ENDC
+  mrf.mapReduce('constants/input_movie', 'src.invertedIndexer.mapper', 7, 'src.invertedIndexer.reducer', 'constants/invertedIndex')
+  tornado.ioloop.IOLoop.instance().start()
+  mrf.mapReduce('constants/input_movie', 'src.idfBuilder.mapper', 1, 'src.idfBuilder.reducer', 'constants/idf')
+  tornado.ioloop.IOLoop.instance().start()
+  mrf.mapReduce('constants/input_movie', 'src.documentStore.mapper', 1, 'src.documentStore.reducer', 'constants/documentStore')
+  tornado.ioloop.IOLoop.instance().start()
+
+  print C.HEADER + "=========== Start Indexing Reviews ===========" + C.ENDC
+  mrf.mapReduce('constants/input_review', 'src.movieIndexer.mapper', 7, 'src.movieIndexer.reducer', 'constants/movieIndexer')
+  tornado.ioloop.IOLoop.instance().start()
+  mrf.mapReduce('constants/input_review', 'src.reviewIndexer.mapper', 1, 'src.reviewIndexer.reducer', 'constants/reviewIndexer')
+  tornado.ioloop.IOLoop.instance().start()
+  
+  
 
   print C.HEADER + "=========== Fire Up All Servers ===========" + C.ENDC
   uid = fork_processes(NumMaster+NumMovie+NumReview+NumIdx+NumDoc)
   # uid = fork_processes(NumMaster+NumMovie+NumReview+NumIdx+NumDoc)
-  
+  #uid = 1
   if uid == 0:
     sockets = bind_sockets(masterServer[uid].split(':')[-1])
     myfront = recom_front.FrontEndApp(MovieServer, ReviewServer)
