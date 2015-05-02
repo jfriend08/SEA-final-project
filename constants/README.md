@@ -46,7 +46,21 @@ Weights = {
 
 # search system
 
+InvertedIndexer = {
+  key: term
+  value: {docid: tf}
+    ex: {771018619: 2, 771408639: 2}
 
+}
 
+IdfIndexer = {
+  key: term
+  value: idf
+}
+
+DocumentStore = {
+  key: movie-id
+  value: everything from Genre_dict
+}
 
 ```
