@@ -8,6 +8,4 @@ for line in sys.stdin:
   docid = kvPair[0]
   content = eval(kvPair[1])
   indexer[docid] = content  
-#print pickle.dumps(indexer)
-print indexer
-
+print pickle.dumps(indexer)
