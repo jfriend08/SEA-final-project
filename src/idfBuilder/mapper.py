@@ -20,4 +20,3 @@ for line in sys.stdin:
   #output
   for term in terms:
     print term + settings.delimiter + docid
-

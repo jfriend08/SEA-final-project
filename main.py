@@ -5,18 +5,19 @@ import tornado.ioloop
 '''
 mrf = framework.MapReduceFramework()
 mrf.getWorkerInfo('address.json')
-mrf.mapReduce('invertedIndex/ii_jobs', 'invertedIndex.IImapper', 4, 'invertedIndex.IIreducer', 'constants/invertedIndex')
+mrf.mapReduce('invertedIndex/ii_jobs', 'invertedIndex.IImapper', 7, 'invertedIndex.IIreducer', 'constants/invertedIndex')
 tornado.ioloop.IOLoop.instance().start()
 
 '''
 
-'''
 mrf = framework.MapReduceFramework()
 mrf.getWorkerInfo('address.json')
-mrf.mapReduce('constants/input', 'src.movieIndexer.mapper', 4, 'src.movieIndexer.reducer', 'constants/output')
+#mrf.mapReduce('constants/input_movie', 'src.invertedIndexer.mapper', 7, 'src.invertedIndexer.reducer', 'constants/invertedIndex')
+#mrf.mapReduce('constants/input_movie', 'src.idfBuilder.mapper', 1, 'src.idfBuilder.reducer', 'constants/idf')
+mrf.mapReduce('constants/input_movie', 'src.documentStore.mapper', 1, 'src.documentStore.reducer', 'constants/documentStore')
 tornado.ioloop.IOLoop.instance().start()
-'''
 
+'''
 worker_address = 'classification/worker_address.json'
 raw_data = 'constants/Genre_dict'
 training_set = 'constants/training_set.p'
@@ -28,3 +29,4 @@ tn.setTraningParameter(0.9, 200, 0.01)
 tn.train(training_set, genres, weights_dir)
 tornado.ioloop.IOLoop.instance().start()
 tn.generateWeightTable(weights_dir)
+'''
