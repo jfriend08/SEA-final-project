@@ -14,7 +14,8 @@ mrf = framework.MapReduceFramework()
 mrf.getWorkerInfo('address.json')
 #mrf.mapReduce('constants/input_movie', 'src.invertedIndexer.mapper', 7, 'src.invertedIndexer.reducer', 'constants/invertedIndex')
 #mrf.mapReduce('constants/input_movie', 'src.idfBuilder.mapper', 1, 'src.idfBuilder.reducer', 'constants/idf')
-mrf.mapReduce('constants/input_movie', 'src.documentStore.mapper', 1, 'src.documentStore.reducer', 'constants/documentStore')
+#mrf.mapReduce('constants/input_movie', 'src.documentStore.mapper', 1, 'src.documentStore.reducer', 'constants/documentStore')
+mrf.mapReduce('constants/input_movie', 'src.genreIndexer.mapper', 1, 'src.genreIndexer.reducer', 'constants/genreIndexer')
 tornado.ioloop.IOLoop.instance().start()
 
 '''
