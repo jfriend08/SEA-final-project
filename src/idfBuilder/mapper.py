@@ -9,8 +9,14 @@ for line in sys.stdin:
   value = eval(kvPair[1])
   
   #get bag of words
-  title = value['title']
-  synopsis = value['synopsis']
+  try:
+    title = value['title']
+  except:
+    title = ''
+  try:
+    synopsis = value['synopsis']
+  except:
+    synopsis = ''
   #cast = value['abridges_cast']
 
   #parse

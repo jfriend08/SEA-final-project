@@ -6,7 +6,7 @@ import sys
 
 This module takes input:
   'constants/Review_dict',
-  'constants/Movie_dict',
+  'constants/Genre_dict',
 and splits them into sys.argv[1] sys.argv[2].in files in:
   'constants/input_review/'
   'constants/input_movie/'
@@ -41,5 +41,5 @@ def reformat(input_path, output_path, num):
   
 if __name__ == "__main__":
   reformat('constants/Review_dict', 'constants/input_review', int(sys.argv[1]))
-  reformat('constants/Movie_dict', 'constants/input_movie', int(sys.argv[2]))
+  reformat('constants/Genre_dict', 'constants/input_movie', int(sys.argv[2]))
 
