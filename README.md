@@ -6,36 +6,30 @@ Building up movie seach engine plus customized recommendation system
 
 # working procedure
 
-## Split data into many partitions
+## 1. Split data into many partitions
 ```
 python -m src.reformatter <# of partitions for review> <# of partitions for movie>
-
 ```
-## call mapreduce workers
+## 2. call mapreduce workers
 ```
 python -m mapreduce.workers
-
 ```
-## call classification workers
+## 3. call classification workers
 ```
 python -m classification.workers
-
 ```
-##prepare pickle files for all servers 
+## 4.prepare pickle files for all servers 
 ```
 python -m Prepare
-
 ```
 
-##Start All the works
-
-Goal: 1. find ports, 2. indexing, 3. fire up all servers
-
-```python
+## 5. Start All servers
+Goal: 1. find ports, 2. fire up all servers
+```
 python ./StartAll.py
 ```
 
-##Structure:
+#Structure:
 The structure of fired-uped HTTP servers are:
 ```
                         --> classifier_front(?)   --> ?
