@@ -39,13 +39,14 @@ def Return_dict2Frequency_dict(mydict):
   #From the dict that movieID is the key, to freq dict that critic is the key
   Frequency_dict = {}
   for eachID in mydict.keys():
-    for (cretics, rating) in mydict[eachID]:
+    for (cretics, rating, quote) in mydict[eachID]:
       if cretics:
         try:
-          Frequency_dict[cretics].append((eachID, rating))
+          Frequency_dict[cretics].append((eachID, rating, quote))
         except:
-          Frequency_dict[cretics] = [(eachID, rating)]  
+          Frequency_dict[cretics] = [(eachID, rating, quote)]  
   return Frequency_dict
+
 def letter2val(letter,addition):
   val = 0
   if letter =="A":
@@ -100,59 +101,66 @@ def ToFormat(mylist):
   body += '</ol>'
   return body
 
-def calCoefficientFromFrequency_dict(freqDict, userPreference):
+def calCoefficientFromFrequency_dict(freqDict, userPreference, user):
   '''
   Goal: Get the best and second best matched cretics, and return the coefficient to the user
 
   Define "match": most overlapped number of movies between user and cretics
   (e.g. user may rated 20 movies, and all other cretics may have 5 overlapped at most. So here we collect cretics with 5 or 4 overlapped movies)
+
+  ToDo: need to skip the case the the best match is the user itself
   '''
+
+  #Remove user from freqDict if it is in there
+  if user in freqDict: 
+    freqDict.pop(user, None) 
 
   userSuperTable = {} #userSuperTable[movie] = rating
   superTable = {} #superTable[critic][movie] = rating
-  cretic_sortedList = []  
+  cretic_sortedList = [] #collect the best-to-worst match cretics in order
   top_cretics = []
   movieOverlap = {}
   combinedOverlappedMovingRating = []
 
-
+  #collect user historical preference, and convert the score to 100 basis
   for (movie, rating) in userPreference:
     userSuperTable[movie] = RatingConversion(rating)
 
+  #Sort the freqDict by the length of values, which the top one is the best match 
   for critic in sorted(freqDict, key=lambda k:len(freqDict[k]), reverse=True):
     cretic_sortedList.append(critic)
     superTable[critic] = {}
-    for (movie, rating) in freqDict[critic]:
+    for (movie, rating, quote) in freqDict[critic]:
       superTable[critic][movie] = RatingConversion(rating)
         
   #collect best and second best cretics with the most numbers of movie reviewed
-  MaxFreq = len(freqDict[cretic_sortedList[0]]) #the first critics in sortedList is the most frequent one
+  MaxFreq = len(freqDict[cretic_sortedList[0]]) #the first critics in sortedList is the most frequent one  
   for eachCritic in cretic_sortedList:
     curFre = len(freqDict[eachCritic])
     if (curFre>=MaxFreq-1):
       top_cretics.append(eachCritic)
-      for (movie, rating) in freqDict[eachCritic]:
+      for (movie, rating, quote) in freqDict[eachCritic]:
         try:
           movieOverlap[movie]+=1
         except:
           movieOverlap[movie]=1
   
+  #get the rating of overlapped movie from user
   UserOverlapMovieRating = []
   for eachMovie in movieOverlap.keys():
-    UserOverlapMovieRating.append(userSuperTable[eachMovie])
-  # combinedOverlappedMovingRating.append(mytmpOverlapMovieRating)
+    UserOverlapMovieRating.append(userSuperTable[eachMovie])  
 
+  #get the rating of overlapped movie from cretics, give it 0 if this cretics has no rating on this movie
   for eachCritic in top_cretics:
     mytmpOverlapMovieRating = []
     for eachMovie in movieOverlap.keys():
       try:
         mytmpOverlapMovieRating.append(superTable[eachCritic][eachMovie])
-      except:
-        # mytmpOverlapMovieRating.append(nan)
+      except:        
         mytmpOverlapMovieRating.append(0)
     combinedOverlappedMovingRating.append(mytmpOverlapMovieRating)
 
-
+  print "Best num of movie overlapped:\t%s" % MaxFreq
   print "top_cretics:\n%s" % top_cretics
   print "movieOverlap:\n%s" % movieOverlap
   print "UserOverlapMovieRating:\n%s" % UserOverlapMovieRating
@@ -174,66 +182,74 @@ class recomHandler(tornado.web.RequestHandler):
   def get(self):
     global ports_movie, ports_review, UserBook
     userID = self.get_argument('user', None)    
+    gener =  self.get_argument('genre', None)    
+    gener = str(gener)
     userID = str(userID)
     
-    MovieHistory = [movie for (movie, score) in UserBook[userID]]
-    ScoreHistory = [score for (movie, score) in UserBook[userID]]
+    print gener 
     
-    
-    myAllReturn_dict = {}
-    for eachServer in ports_movie:
-      toFetch = '+'.join(MovieHistory)
-      toFetch = '%s/movie?movieID=%s' % (eachServer,toFetch)
-      print "Fetch MovieServer: %s" % toFetch
-      http_client = AsyncHTTPClient()                                
-      response = yield http_client.fetch(toFetch)            
-      tmp_dict = json.loads(response.body)
-      # here to merge all the returned json to myAllReturn_dict
-      myAllReturn_dict = {key: value for (key, value) in (myAllReturn_dict.items() + tmp_dict.items())}
-    
-    '''
-    myAllReturn_dict.keys()  --> all the moviedIDs that has been rated by this current user
-    myAllReturn_dict[movieID] --> [(critics1,rating1), (critics2,rating2)] --> all the historical critics rating in our database
+    try:
+      MovieHistory = [movie for (movie, score) in UserBook[userID]]
+      ScoreHistory = [score for (movie, score) in UserBook[userID]]
+      myAllReturn_dict = {}
+      
+      
+      #Fetching Movie server and collect them all      
+      for eachServer in ports_movie:
+        toFetch = '+'.join(MovieHistory)
+        toFetch = '%s/movie?movieID=%s' % (eachServer,toFetch)
+        print "Fetch MovieServer: %s" % toFetch
+        
+        http_client = AsyncHTTPClient()                                
+        response = yield http_client.fetch(toFetch)            
+        tmp_dict = json.loads(response.body)
+        # here to merge all the returned json to myAllReturn_dict
+        myAllReturn_dict = {key: value for (key, value) in (myAllReturn_dict.items() + tmp_dict.items())}
+            
+      '''
+      myAllReturn_dict.keys()  --> all the moviedIDs that has been rated by this current user
+      myAllReturn_dict[movieID] --> [(critics1,rating1,quote1), (critics2,rating2,quote2)] --> all the historical critics rating in our database
 
-    myFrequency_dict.keys()  --> all the critics
-    myFrequency_dict[critics] --> [(MovieID, Rating), (MovieID, Rating) ... ]
-    '''
-    
-    myFrequency_dict = Return_dict2Frequency_dict (myAllReturn_dict)
-    # print "myFrequency_dict:\n%s" % myFrequency_dict
+      myFrequency_dict.keys()  --> all the critics
+      myFrequency_dict[critics] --> [(MovieID, Rating, quote), (MovieID, Rating, quote) ... ]
+      '''
+      
+      #From the dict that movieID is the key, to freq dict that critic is the key
+      myFrequency_dict = Return_dict2Frequency_dict (myAllReturn_dict)      
 
-    (top_cretics, coefficient) = calCoefficientFromFrequency_dict(myFrequency_dict, UserBook[userID])    
-    print "top_cretics:\n%s" % top_cretics
-    print "coefficient:\n%s" % coefficient
+      #Goal: Get the best and second best matched cretics, and return the coefficient to the user
+      (top_cretics, coefficient) = calCoefficientFromFrequency_dict(myFrequency_dict, UserBook[userID], userID)    
+      
 
+      myReviewReturn_dict = {}
+      for eachServer in ports_review:
+        toFetch = '+'.join(top_cretics).replace(" ", "_")      
+        toFetch = '%s/review?critics=%s' % (eachServer,toFetch)
+        print "Fetch ReviewServer: %s" % toFetch
+        http_client = AsyncHTTPClient()                                
+        response = yield http_client.fetch(toFetch)            
+        tmp_dict = json.loads(response.body)
+        myReviewReturn_dict = {str(key): value for (key, value) in (myReviewReturn_dict.items() + tmp_dict.items())}
+      
+      # print "myReviewReturn_dict:\n%s" % myReviewReturn_dict
+      FinalList = []
+      for i in xrange(len(top_cretics)):
+        weighting = coefficient[i]
+        cur_cretics = str(top_cretics[i])
+        # print "type: %s" % type(cur_cretics)
+        # print myReviewReturn_dict[cur_cretics][0]
+        # print "Weighting:\t%s\tcur_cretics:\t%s" % (weighting, cur_cretics)
+        myNewWeightedRating = [(movie, RatingConversion(rating)*weighting) for (movie, rating) in myReviewReturn_dict[cur_cretics]]
+        # print "Orginal Rating:\n%s\nWeighted Rating:\n%s" % (myReviewReturn_dict[cur_cretics][:10], myNewWeightedRating[:10])
+        FinalList.extend(myNewWeightedRating)
 
-    myReviewReturn_dict = {}
-    for eachServer in ports_review:
-      toFetch = '+'.join(top_cretics).replace(" ", "_")      
-      toFetch = '%s/review?critics=%s' % (eachServer,toFetch)
-      print "Fetch ReviewServer: %s" % toFetch
-      http_client = AsyncHTTPClient()                                
-      response = yield http_client.fetch(toFetch)            
-      tmp_dict = json.loads(response.body)
-      myReviewReturn_dict = {str(key): value for (key, value) in (myReviewReturn_dict.items() + tmp_dict.items())}
-    
-    print "myReviewReturn_dict:\n%s" % myReviewReturn_dict
-    FinalList = []
-    for i in xrange(len(top_cretics)):
-      weighting = coefficient[i]
-      cur_cretics = str(top_cretics[i])
-      # print "type: %s" % type(cur_cretics)
-      # print myReviewReturn_dict[cur_cretics][0]
-      print "Weighting:\t%s\tcur_cretics:\t%s" % (weighting, cur_cretics)
-      myNewWeightedRating = [(movie, RatingConversion(rating)*weighting) for (movie, rating) in myReviewReturn_dict[cur_cretics]]
-      print "Orginal Rating:\n%s\nWeighted Rating:\n%s" % (myReviewReturn_dict[cur_cretics][:10], myNewWeightedRating[:10])
-      FinalList.extend(myNewWeightedRating)
+      #Sort tuple list
+      FinalList = sorted(FinalList, key=lambda tup: tup[1], reverse=True)    
+      toprint = ToFormat(FinalList[:20])
+      self.write(toprint)
 
-    #Sort tuple list
-    FinalList = sorted(FinalList, key=lambda tup: tup[1], reverse=True)    
-    toprint = ToFormat(FinalList[:20])
-    self.write(toprint)
-
+    except:
+      self.write("User<strong> %s </strong>does not have review history in system" % userID)
     # self.write("Hi User: %s <br>%s" % (userID, UserBook[userID]))
     
 
