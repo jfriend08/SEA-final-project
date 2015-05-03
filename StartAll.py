@@ -130,6 +130,7 @@ def main():
   tornado.ioloop.IOLoop.instance().start()
   mrf.mapReduce('constants/input_review', 'src.reviewIndexer.mapper', 1, 'src.reviewIndexer.reducer', 'constants/reviewIndexer')
   tornado.ioloop.IOLoop.instance().start()
+  
   '''
   
 
