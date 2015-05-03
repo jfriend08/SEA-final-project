@@ -46,6 +46,7 @@ class MapReduceFramework:
     idx = 0
     while len(inputs) > 0:
       url = self.formMapQuery(self.workers[idx%self.nMachines], mapperPath, inputs[0], str(nReducers))
+      print url
       response = yield http_client.fetch(url)
       temp = json.loads(response.body)
       if temp['status'] == 'success':

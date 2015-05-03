@@ -3,6 +3,11 @@ from tornado import gen
 import pickle
 import string
 import json
+import re
+#
+from nltk.stem.lancaster import LancasterStemmer
+
+st = LancasterStemmer()
 
 class Application(tornado.web.Application):
   def setGenres(self, picklePath):
@@ -20,8 +25,10 @@ class PredictionHandler(tornado.web.RequestHandler):
     # trim the data
     s = str(description)
     s = s.translate(string.maketrans("",""), string.punctuation)
+    s = re.sub(' +', ' ', s).strip()
+    s = " ".join(st.stem(word) for word in s.split(" "))
     s = s.lower()
-    words = s.strip().split()
+    words = s.split()
     # initialize the scores
     scores = []
     for i in range(len(self.application.genres)):

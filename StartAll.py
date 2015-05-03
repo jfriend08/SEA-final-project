@@ -107,7 +107,7 @@ def main():
   print C.OKBLUE + "DocServer:\t" + str(DocServer) + C.ENDC
   print C.OKBLUE + "ClassifierServer:\t" + str(ClassifierServer) + C.ENDC
   
-  
+
   print C.HEADER + "=========== Fire Up All Servers ===========" + C.ENDC
   uid = fork_processes(NumMaster+NumMovie+NumReview+NumIdx+NumDoc)
   

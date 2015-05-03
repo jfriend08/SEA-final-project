@@ -44,16 +44,18 @@ class TrainingHandler(tornado.web.RequestHandler):
     count = 0
     while self.accuracy < require:
       if count == maxtry:
-        res = {"status": "failed", "info": 'couldn\'t reach accuracy in '+str(maxtry)+' rounds' }
+        res = {"status": "failed", "info": 'couldn\'t reach accuracy in '+str(maxtry)+' rounds', 'accuracy': str(self.accuracy) }
         self.write(json.dumps(res))
+        print 'failed'
         return
       global weight 
       weight = dict(temp)
       self.train(g)
       count += 1
-      print '===== accuracy: '+str(self.accuracy)
+      print str(count)+' ===== accuracy: '+str(self.accuracy)
     res = {"status": "success", "weight": weight}
     self.write(json.dumps(res))
+    print 'success'
 
   def setTrainingSet(self, picklePath):
     global trainingSet
@@ -106,7 +108,9 @@ class TrainingHandler(tornado.web.RequestHandler):
     else:
       change = -self.adjust
     for w in words:
-      temp[w] *= 1+change
+      #temp[w] *= 1+change
+      temp[w] += change
+      #if temp[w] > 1: temp[w] = 1
 
 
 

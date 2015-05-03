@@ -1,22 +1,41 @@
 # SEA-final-project
 Building up movie seach engine plus customized recommendation system
 
-#Constants output file:
+#Constants files:
 [google drive](https://drive.google.com/folderview?id=0BzG5zLRRrgKwfkFPVHE5ZUZ2WGVZM28wUXZqUzU5WmhuZ3ZFdURTMzNYNzJNeVN2T1dGWWM&usp=sharing)
 
-#Split data into many partitions
+# Working Procedure
+
+## 1. Split data into many partitions
 ```
 python -m src.reformatter <# of partitions for review> <# of partitions for movie>
-
+```
+## 2. call mapreduce workers
+```
+python -m mapreduce.workers
+```
+## 3. call classification workers
+```
+python -m classification.workers
+```
+## 4.prepare pickle files for all servers 
+```
+python -m Prepare
 ```
 
-#Start All the works
-##Goal: 1. find ports, 2. indexing, 3. fire up all servers
-```python
+## 5. Start All servers
+Goal: 1. find ports, 2. fire up all servers
+```
 python ./StartAll.py
-
 ```
-##Structure:
+
+## 6. Fire up frontend (google app engine)
+https://cloud.google.com/sdk/#Quick_Start
+```
+dev_appserver.py --host=localhost --port=8080 frontend
+```
+
+#Structure:
 The structure of fired-uped HTTP servers are:
 ```
                         --> classifier_front(?)   --> ?
