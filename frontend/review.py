@@ -25,7 +25,7 @@ from config import backendInfo
 import urllib2
 #from tornado.httpclient import AsyncHTTPClient
 
-backend = backendInfo.BackendInfo('config/worker_info.json')
+backend = backendInfo.BackendInfo('config/workers.json')
 
 nRater = len(backend.info['rate'])
 curRater = 0

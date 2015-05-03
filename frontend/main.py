@@ -25,14 +25,14 @@ from config import backendInfo
 import urllib2
 #from tornado.httpclient import AsyncHTTPClient
 
-backend = backendInfo.BackendInfo('config/worker_info.json')
+backend = backendInfo.BackendInfo('config/workers.json')
 
 nClassifier = len(backend.info['classifier'])
 curClassifier = 0
 nSearch = len(backend.info['search'])
 curSearch = 0
-nRecommand = len(backend.info['recommand'])
-curRecommand = 0
+nRecommend = len(backend.info['recommend'])
+curRecommend = 0
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -60,16 +60,16 @@ class MainHandler(webapp2.RequestHandler):
     s = urllib.urlencode(query)
     #print urllib.unquote(s)
     return 'http://'+worker+'/search?'+s
-  def formRecommandUrl(self, u, g):
-    global curRecommand
-    worker = backend.info['recommand'][curRecommand]
-    curRecommand += 1
-    if curRecommand == nRecommand: curRecommand = 0
+  def formrecommendUrl(self, u, g):
+    global curRecommend
+    worker = backend.info['recommend'][curRecommend]
+    curRecommend += 1
+    if curRecommend == nRecommend: curRecommend = 0
     query = {}
     query['user'] = u
     query['genre'] = g
     s = urllib.urlencode(query)
-    return 'http://'+worker+'/recommand?'+s
+    return 'http://'+worker+'/recommend?'+s
   def get(self):
     query = self.request.get('q')
     genres = []
@@ -88,7 +88,7 @@ class MainHandler(webapp2.RequestHandler):
     
     user = users.get_current_user()
     if user:
-      url = self.formRecommandUrl(user.user_id(), genres)
+      url = self.formrecommendUrl(user.user_id(), genres)
       self.response.write(url+'<br>')
       link = users.create_logout_url('/')
     else:
