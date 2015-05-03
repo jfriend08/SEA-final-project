@@ -4,12 +4,26 @@ Building up movie seach engine plus customized recommendation system
 #Constants files:
 [google drive](https://drive.google.com/folderview?id=0BzG5zLRRrgKwfkFPVHE5ZUZ2WGVZM28wUXZqUzU5WmhuZ3ZFdURTMzNYNzJNeVN2T1dGWWM&usp=sharing)
 
-# working procedure
 
-## Split data into many partitions
+# Working Procedure
+
+## 1. Split data into many partitions
 ```
+#Note, the num of partitions should corresping to the num of backend works
+#Default: (NumSuperFront, NumMaster, NumMovie, NumReview, NumIdx, NumDoc)= (1, 3, 3, 3, 3, 3)
 python -m src.reformatter <# of partitions for review> <# of partitions for movie>
-
+```
+## 2. call mapreduce workers
+```
+python -m mapreduce.workers
+```
+## 3. call classification workers
+```
+python -m classification.workers
+```
+## 4.prepare pickle files for all servers 
+```
+python -m Prepare
 ```
 ## call mapreduce workers
 ```
@@ -31,11 +45,23 @@ python -m Prepare
 
 Goal: 1. find ports, 2. indexing, 3. fire up all servers
 
+<<<<<<< HEAD
 ```python
-python ./StartAll.py
-
+=======
+## 5. Start All servers
+Goal: 1. find ports, 2. fire up all servers
 ```
-##Structure:
+>>>>>>> 798c3e4056310a7ef46a703de9ae47eb7f00bfb6
+python ./StartAll.py
+```
+
+## 6. Fire up frontend (google app engine)
+https://cloud.google.com/sdk/#Quick_Start
+```
+dev_appserver.py --host=localhost --port=8080 frontend
+```
+
+#Structure:
 The structure of fired-uped HTTP servers are:
 ```
                         --> classifier_front(?)   --> ?

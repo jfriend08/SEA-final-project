@@ -8,6 +8,13 @@ classification/*.json
 constants/classification_weights/*.out
 constants/training_set.p
 address.json
+constants/Doc
+constants/IDF
+constants/Index
+constants/input
+constants/Movie*
+constants/Review*
+constants/Genre*
 
 #constants
 constants/*dict*
