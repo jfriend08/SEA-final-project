@@ -4,7 +4,7 @@ Building up movie seach engine plus customized recommendation system
 #Constants files:
 [google drive](https://drive.google.com/folderview?id=0BzG5zLRRrgKwfkFPVHE5ZUZ2WGVZM28wUXZqUzU5WmhuZ3ZFdURTMzNYNzJNeVN2T1dGWWM&usp=sharing)
 
-# working procedure
+# Working Procedure
 
 ## 1. Split data into many partitions
 ```
@@ -27,6 +27,12 @@ python -m Prepare
 Goal: 1. find ports, 2. fire up all servers
 ```
 python ./StartAll.py
+```
+
+## 6. Fire up frontend (google app engine)
+https://cloud.google.com/sdk/#Quick_Start
+```
+dev_appserver.py --host=localhost --port=8080 frontend
 ```
 
 #Structure:
