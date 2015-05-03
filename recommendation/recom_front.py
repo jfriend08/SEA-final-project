@@ -96,7 +96,7 @@ def ToFormat(mylist):
   body = '<font size="5" color="blue">Top %s Recommended Movies</font><br>\n<ol>' % len(mylist)
   for i in xrange(len(mylist)):
     # print movie_dict[mylist[i][0]].keys()
-    body += '<li>MovieID: %s<br>Title: %s<br>WeightedRating: %s<br>Poster: <img src=%s alt="HTML5 Icon" ></li>' % (mylist[i][0], movie_dict[mylist[i][0]]['title'], mylist[i][1], movie_dict[mylist[i][0]]['posters']['profile'])
+    body += '<li>MovieID: %s<br>Title: %s<br>WeightedRating: %s<br><img src=%s alt="HTML5 Icon" ></li>' % (mylist[i][0], movie_dict[mylist[i][0]]['title'], mylist[i][1], movie_dict[mylist[i][0]]['posters']['profile'])
     # body += '<li><a href=%s>%s</a><br>DocId: %s<br>%s</li>' % (n['url'], n['title'], n['docID'], n['snippet'])
   body += '</ol>'
   return body

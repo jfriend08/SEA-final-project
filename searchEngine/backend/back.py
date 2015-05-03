@@ -51,19 +51,21 @@ def Tosnippet2(text, keywords, extend):
     returnText= '...'    
     locations = {}
     output = ''
-    for word in keywords:                
-        for m in re.finditer(word.lower(), text.lower()):
+    for word in keywords:        
+        for m in re.finditer(word.lower(), text.lower()):            
             try:
                 locations[word].append((m.start(), m.end()))
             except:
-                locations[word] = [(m.start(), m.end())]             
+                locations[word] = [(m.start(), m.end())]                     
 
     for key in locations.keys():
         (start, end)= locations[key][0]
-        toReplace = text[start:end]
-        tmptext = text[start-extend:end+extend]
-        output += tmptext.replace(toReplace, '<strong>{}</strong>'.format(toReplace)) + "..."
-    
+        toReplace = text[start:end]     
+        str_start = 0 if (start-extend<0) else start-extend        
+        str_end = len(text) if (end+extend>len(text)) else end+extend
+        
+        tmptext = text[str_start:str_end]                
+        output += tmptext.replace(toReplace, '<strong>{}</strong>'.format(toReplace)) + "...<br>"            
     return output
 
 
@@ -95,7 +97,7 @@ def vectorSpaceCalculation(vectorSpace):
                 q_space[token] = idf
 
     # Length of q 
-    print TFidf_dic_vectorSpace
+    print "TFidf_dic_vectorSpace:\t%s" % TFidf_dic_vectorSpace
     squ_sum=0
     for k in q_space.keys():        
         squ_sum= squ_sum + q_space[k]*q_space[k]
@@ -141,18 +143,22 @@ class idxSearchHandler(tornado.web.RequestHandler):
         global invertedIndex, tokenizer, IDF_Index
         myquery = self.request.uri
         myquery = urllib.unquote(myquery.split('?q=')[-1])
-        tokens = [t.lower() for t in tokenizer.tokenize(myquery)]                
+        tokens = [t for t in tokenizer.tokenize(myquery)]                
+        # tokens = [t.lower() for t in tokenizer.tokenize(myquery)]                
+        print "tokens in idxSearchHandler:\t%s"%tokens        
         vectorSpace = {}
         alllistfromToken = []
-        for token in tokens:
-            
+        for token in tokens:            
             try:                        
                 myidf = IDF_Index[token]                
                 myreturns = invertedIndex[token]
-                new = []
-                for i in range(len(myreturns)):                    
-                    (myid, TF) = myreturns[i]
-                    new.append((myid, TF, myidf))
+                new = []                
+                for myid in myreturns.keys():
+                    new.append((myid, myreturns[myid], myidf))
+                    
+                # for i in range(len(myreturns)):                    
+                #     (myid, TF) = myreturns[i]
+                #     new.append((myid, TF, myidf))
                 vectorSpace[token] = new
             except KeyError:
                 continue
@@ -168,25 +174,22 @@ class docSearchHandler(tornado.web.RequestHandler):
     def get(self):
         global invertedIndex, tokenizer, IDF_Index
         myquery = urllib.unquote(self.request.uri)
-        (docid, query) = myquery.replace('/doc?id=','\t').split("&q=")        
+        docid = self.get_argument('id', None)
+        query = self.get_argument('q', None)
+        # (docid, query) = myquery.replace('/doc?id=','\t').split("&q=")        
         query=query.split()
+        print "docid in Doc Server:\t%s"%docid
+        print "query in Doc Server:\t%s"%query        
+        # print invertedIndex[docid]['synopsis']
 
-        self.write(json.dumps({ 'url':invertedIndex[int(docid)]['url'],
-            'snippet':Tosnippet2(invertedIndex[int(docid)]['text'], query, 50),
+        self.write(json.dumps({ 'url':"http://www.rottentomatoes.com/m/"+invertedIndex[docid]['title'].replace(",", "").replace(".", "").replace(":", "").replace(" - ", "_").replace(" ", "_"),
+            'posterurl':invertedIndex[docid]['posters']['profile'],
+            'snippet':Tosnippet2(invertedIndex[docid]['synopsis'], query, 50),
             'docID':docid,
-            'title':invertedIndex[int(docid)]['title']
+            'title':invertedIndex[docid]['title']
 
             }))
         
-
-        # body = '<li><a href=%s>%s</a><br>%s</li>' % (invertedIndex[int(docid)]['url'], invertedIndex[int(docid)]['title'], Tosnippet(invertedIndex[int(docid)]['text'], query, 150))            
-
-        # self.write(body)
-        # self.write({'result':[{ 'url':invertedIndex[int(docid)]['url'],
-        #     'snippet': Tosnippet(invertedIndex[int(docid)]['text'], query, 150),
-        #     'docID': docid,
-        #     'title': invertedIndex[int(docid)]['title']
-        #     }]})
         
     
         
@@ -208,12 +211,12 @@ class BackEndApp(object):
     def __init__(self, serverType, serverNum, port):
         global invertedIndex, tokenizer, IDF_Index
             
-        path2IDF =  './constants/IDF/0.out'
+        path2IDF =  './constants/idf/0.out'
         if (serverType=='IndexServer'):
-            path = './constants/Index/' + str(serverNum) + '.out'        
+            path = './constants/invertedIndex/' + str(serverNum) + '.out'        
             # path = os.path.dirname(__file__) + '/../../assignment5/constants/Index/' + str(serverNum) + '.out'
         elif (serverType=='DocServer'):
-            path = './constants/Doc/' + str(serverNum) + '.out'            
+            path = './constants/documentStore/' + str(serverNum) + '.out'            
             # path = os.path.dirname(__file__) + '/../../assignment5/constants/Doc/' + str(serverNum) + '.out'
         else:
             raise NameError('path error')
@@ -224,10 +227,6 @@ class BackEndApp(object):
         IDF_Index = pickle.load(open(path2IDF, 'r'))
         tokenizer = RegexpTokenizer(r'\w+')
         
-        if (serverType=='docServer'):
-            print invertedIndex.keys()[0:10]
-
-
         self.app = tornado.httpserver.HTTPServer(Application(serverType) )        
 
         # http_server = tornado.httpserver.HTTPServer(Application(serverType) )

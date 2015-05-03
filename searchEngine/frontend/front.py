@@ -19,7 +19,16 @@ ports=[]
 ports_index = []
 ports_Doc = []
 
-# print "front end: http://linserv2.cims.nyu.edu:" + str(ports[0])
+def remove_duplicates(mylist):
+    output = []
+    seen = set()
+    for (movieID, value) in mylist:
+        # If value has not been encountered yet,
+        # ... add it to both list and set.
+        if movieID not in seen:
+            output.append((movieID, value))
+            seen.add(movieID)
+    return output
 
 class Application(tornado.web.Application):
     def __init__(self):
@@ -33,16 +42,20 @@ class Application(tornado.web.Application):
 class SearchHandler(tornado.web.RequestHandler):
     @gen.coroutine            
     def get(self):
-        
+        NumIndexServer = len(ports_index)
+        NumDocServer = len(ports_Doc)
         K=10
-        myquery = self.request.uri        
+        myquery = self.request.uri                
+        gener =  self.get_argument('genre', None)    
+        myquery =  self.get_argument('q', None)    
         print "\n" + bcolors.HEADER + '====== OPERATION RECORD ======'+ bcolors.ENDC    
         print bcolors.LIGHTBLUE + "Searching query: " + myquery + bcolors.ENDC
+        
         # fetching index server
         doc_list=[]
         for i in range(len(ports_index)):            
-            toFetch=str(ports_index[i]) + str(myquery.replace('/search?', '/index?'))
-            # toFetch="http://linserv2.cims.nyu.edu:" + str(ports_index[i]) + str(myquery.replace('search', 'index'))
+
+            toFetch="%s/index?q=%s" %(ports_index[i], myquery.replace(" ", "%20"))            
             print bcolors.LIGHTBLUE + "Fetching index server " + toFetch + bcolors.ENDC
             http_client = AsyncHTTPClient()                                
             tmp_response = yield http_client.fetch(toFetch)            
@@ -51,27 +64,27 @@ class SearchHandler(tornado.web.RequestHandler):
 
         
         doc_list.sort(key=lambda x: x[1], reverse=True)
-        print bcolors.LIGHTBLUE + "Top" + str(K) + " doc_list after sorting: " + str(doc_list[0:10]) + bcolors.ENDC
-
+        doc_list = remove_duplicates(doc_list[0:K])
+        print bcolors.LIGHTBLUE + "Top" + str(K) + " doc_list after sorting: " + str(doc_list[0:K]) + bcolors.ENDC        
+        
         # find the min number
         minN= min(K,len(doc_list))
 
         # fetching document server
         report=[]
         # body = 'Number of results: %s <br>\n<ol>' % minN
-        body = '<font size="5" color="blue">Top %s Number of results:</font><br>\n<ol>' % minN
+        body = '<font size="5" color="blue">Top %s search results:</font><br>\n<ol>' % minN
         for i in range(min(K,len(doc_list))):                                                            
-            # print "doc_list[i][0]: " + str(doc_list[i][0])
-            toFetch=str(ports_Doc[int(doc_list[i][0])%3]) + "/doc?id=" + str(doc_list[i][0]) + "&" + str(myquery.replace('/search?', ''))
-            # toFetch="http://linserv2.cims.nyu.edu:" + str(ports_Doc[doc_list[i][0] %3]) + "/doc?id=" + str(doc_list[i][0]) + "&" + str(myquery.replace('/search?', ''))
+            
+            Docidx = hash(str(doc_list[i][0]))%NumDocServer
+            print "Docidx in front end:%s"%Docidx            
+            toFetch="%s/doc?id=%s&q=%s" %(ports_Doc[Docidx], doc_list[i][0],myquery.replace(" ", "%20"))            
+            
             print bcolors.LIGHTBLUE + "Fetching document server " + toFetch + bcolors.ENDC
             http_client = AsyncHTTPClient()                                
             tmp_response = yield http_client.fetch(toFetch)
-            n=json.loads(tmp_response.body)
-            print "keys: " + str(n.keys())
-            # print n
-            # print result
-            body += '<li><a href=%s>%s</a><br>DocId: %s<br>%s</li>' % (n['url'], n['title'], n['docID'], n['snippet'])            
+            n=json.loads(tmp_response.body)                        
+            body += '<li><a href=%s>%s</a><br>DocId: %s<br>%s<br><img src=%s alt="HTML5 Icon" ></li>' % (n['url'], n['title'], n['docID'], n['snippet'], n['posterurl'])            
 
         body += '</ol>'
         self.write('<html><head><title>SEA search engine</title></head><body>%s</body></html>' % (body))
