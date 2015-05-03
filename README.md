@@ -8,6 +8,8 @@ Building up movie seach engine plus customized recommendation system
 
 ## 1. Split data into many partitions
 ```
+#Note, the num of partitions should corresping to the num of backend works
+#Default: (NumSuperFront, NumMaster, NumMovie, NumReview, NumIdx, NumDoc)= (1, 3, 3, 3, 3, 3)
 python -m src.reformatter <# of partitions for review> <# of partitions for movie>
 ```
 ## 2. call mapreduce workers
