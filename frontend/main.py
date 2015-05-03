@@ -80,7 +80,7 @@ class MainHandler(webapp2.RequestHandler):
       scores = json.loads(result.content)['scores']
       #self.response.write(str(scores)+'<br>')
       for pair in scores:
-        if pair[1] >= 0.7:
+        if pair[1] >= 1.0:
           genres.append(str(pair[0]))
       self.response.write(str(genres)+'<br>')
       url = self.formSearchUrl(query, genres)

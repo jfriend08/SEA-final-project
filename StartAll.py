@@ -106,6 +106,7 @@ def main():
   print C.OKBLUE + "DocServer:\t" + str(DocServer) + C.ENDC
   print C.OKBLUE + "ClassifierServer:\t" + str(ClassifierServer) + C.ENDC
   
+  '''
   print C.HEADER + "=========== Instantiate MapReduceFramework ===========" + C.ENDC
   
   mrf = framework.MapReduceFramework()
@@ -116,19 +117,20 @@ def main():
   # localIndexer.ReviewIndexing()
   
   print C.HEADER + "=========== Start Indexing Movies ===========" + C.ENDC
-  mrf.mapReduce('constants/input_movie', 'src.invertedIndexer.mapper', 7, 'src.invertedIndexer.reducer', 'constants/invertedIndex')
-  tornado.ioloop.IOLoop.instance().start()
-  mrf.mapReduce('constants/input_movie', 'src.idfBuilder.mapper', 1, 'src.idfBuilder.reducer', 'constants/idf')
-  tornado.ioloop.IOLoop.instance().start()
-  mrf.mapReduce('constants/input_movie', 'src.documentStore.mapper', 1, 'src.documentStore.reducer', 'constants/documentStore')
-  tornado.ioloop.IOLoop.instance().start()
+  #mrf.mapReduce('constants/input_movie', 'src.invertedIndexer.mapper', 7, 'src.invertedIndexer.reducer', 'constants/invertedIndex')
+  tornado.ioloop.IOLoop.current().run_sync(mrf.mapReduce('constants/input_movie', 'src.invertedIndexer.mapper', 7, 'src.invertedIndexer.reducer', 'constants/invertedIndex'))
+  #tornado.ioloop.IOLoop.instance().start()
+  tornado.ioloop.IOLoop.current().run_sync(mrf.mapReduce('constants/input_movie', 'src.idfBuilder.mapper', 1, 'src.idfBuilder.reducer', 'constants/idf'))
+  #tornado.ioloop.IOLoop.instance().start()
+  tornado.ioloop.IOLoop.current().run_sync(mrf.mapReduce('constants/input_movie', 'src.documentStore.mapper', 1, 'src.documentStore.reducer', 'constants/documentStore'))
+  #tornado.ioloop.IOLoop.instance().start()
 
   print C.HEADER + "=========== Start Indexing Reviews ===========" + C.ENDC
   mrf.mapReduce('constants/input_review', 'src.movieIndexer.mapper', 7, 'src.movieIndexer.reducer', 'constants/movieIndexer')
   tornado.ioloop.IOLoop.instance().start()
   mrf.mapReduce('constants/input_review', 'src.reviewIndexer.mapper', 1, 'src.reviewIndexer.reducer', 'constants/reviewIndexer')
   tornado.ioloop.IOLoop.instance().start()
-  
+  '''
   
 
   print C.HEADER + "=========== Fire Up All Servers ===========" + C.ENDC

@@ -9,6 +9,10 @@ import json
 import urllib
 import os
 import string
+import shutil
+import re
+#
+from nltk.stem.lancaster import LancasterStemmer
 
 class Trainer:
   workers = []
@@ -27,6 +31,7 @@ class Trainer:
     data = []
     genres = set([])
     count = 0
+    st = LancasterStemmer()
     for key in raw.keys():
       movie = raw[key]
       # if no genre or synopsis data
@@ -37,8 +42,11 @@ class Trainer:
       for g in temp['genres']:
         genres.add(g)
       # trim out the punctuation and transform to lowercase
+      #replace_punctuation = string.maketrans(string.punctuation, ' '*len(string.punctuation))
       s = str(movie['synopsis'])
       s = s.translate(string.maketrans("",""), string.punctuation)
+      s = re.sub(' +', ' ', s).strip()
+      s = " ".join(st.stem(word) for word in s.split(" "))
       temp['synopsis'] = s.lower()
       data.append(temp)
       count += 1
@@ -56,7 +64,8 @@ class Trainer:
   @gen.coroutine
   def train(self, setPath, genres, outputDir):
     print '====== start training ====='
-    if not os.path.exists(outputDir): os.mkdir(outputDir)
+    if os.path.exists(outputDir): shutil.rmtree(outputDir)
+    os.mkdir(outputDir)
     genres = list(genres)
     idx = 0
     num = 0
@@ -66,8 +75,13 @@ class Trainer:
       url = self.formTrainQuery(w, g, setPath)
       print url
       http_client = AsyncHTTPClient()
-      response = yield http_client.fetch(url)
+      request = tornado.httpclient.HTTPRequest(url=url, connect_timeout=80.0, request_timeout=80.0)
+      print 'request'
+      response = yield tornado.gen.Task(http_client.fetch, request)
+      #response = yield http_client.fetch(url)
+      print 'response'
       temp = json.loads(response.body)
+      print 'temp'
       if temp['status'] == 'success':
         print '=========== success on '+g
         file = open(str(outputDir)+'/'+str(g)+'.out', 'w')
