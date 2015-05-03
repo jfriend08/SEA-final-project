@@ -26,6 +26,7 @@ ports=[]
 ports_movie = []
 ports_review = []
 movie_dict = {}
+genere_dict = {}
 
 
 
@@ -91,14 +92,27 @@ def printMatrix(matrix):
   for i in xrange(len(matrix)):
     print matrix[i]    
 
-def ToFormat(mylist):
-  global movie_dict
-  body = '<font size="5" color="blue">Top %s Recommended Movies</font><br>\n<ol>' % len(mylist)
+def ToFormat(mylist, genre):
+  global movie_dict, genere_dict
+  body = '<font size="5" color="blue">Top %s Recommended Movies</font><br>\n<ul>' % len(mylist)
   for i in xrange(len(mylist)):
-    # print movie_dict[mylist[i][0]].keys()
-    body += '<li>MovieID: %s<br>Title: %s<br>WeightedRating: %s<br><img src=%s alt="HTML5 Icon" ></li>' % (mylist[i][0], movie_dict[mylist[i][0]]['title'], mylist[i][1], movie_dict[mylist[i][0]]['posters']['profile'])
+    
+    Highlight_bit = False
+    try:
+      for cur_gener in genere_dict[mylist[i][0]]:
+        # print "cur_gener:%s"%cur_gener
+        # print "genre:%s"%genre
+        if cur_gener in genre:
+          Highlight_bit = True
+          break
+    except:
+      pass
+    if Highlight_bit:
+      body += '<li><a href=%s><font color="red">Title: %s</font></a><br>MovieID: %s<br>WeightedRating: %s<br><img src=%s alt="HTML5 Icon" ></li>' % ("http://www.rottentomatoes.com/m/"+movie_dict[mylist[i][0]]['title'].replace(",", "").replace(".", "").replace(":", "").replace(" - ", "_").replace(" ", "_"), movie_dict[mylist[i][0]]['title'], mylist[i][0], mylist[i][1], movie_dict[mylist[i][0]]['posters']['profile'])
+    else:
+      body += '<li>Title: <a href=%s>%s</a><br>MovieID: %s<br>WeightedRating: %s<br><img src=%s alt="HTML5 Icon" ></li>' % ("http://www.rottentomatoes.com/m/"+movie_dict[mylist[i][0]]['title'].replace(",", "").replace(".", "").replace(":", "").replace(" - ", "_").replace(" ", "_"), movie_dict[mylist[i][0]]['title'], mylist[i][0], mylist[i][1], movie_dict[mylist[i][0]]['posters']['profile'])
     # body += '<li><a href=%s>%s</a><br>DocId: %s<br>%s</li>' % (n['url'], n['title'], n['docID'], n['snippet'])
-  body += '</ol>'
+  body += '</ul>'
   return body
 
 def calCoefficientFromFrequency_dict(freqDict, userPreference, user):
@@ -186,7 +200,7 @@ class recomHandler(tornado.web.RequestHandler):
     gener = str(gener)
     userID = str(userID)
     
-    print gener 
+    print "genre!!!!!!!!%s"%gener
     
     try:
       MovieHistory = [movie for (movie, score) in UserBook[userID]]
@@ -245,7 +259,7 @@ class recomHandler(tornado.web.RequestHandler):
 
       #Sort tuple list
       FinalList = sorted(FinalList, key=lambda tup: tup[1], reverse=True)    
-      toprint = ToFormat(FinalList[:20])
+      toprint = ToFormat(FinalList[:20], gener)
       self.write(toprint)
 
     except:
@@ -259,12 +273,14 @@ class recomHandler(tornado.web.RequestHandler):
 
 class FrontEndApp(object):
   def __init__(self, MovieServers, ReviewServer):
-    global ports_movie, ports_review, UserBook, movie_dict
+    global ports_movie, ports_review, UserBook, movie_dict, genere_dict
     ports_movie = MovieServers
     ports_review = ReviewServer
     
     path = os.path.dirname(__file__) + '/../constants/Movie_dict'    
     movie_dict = pickle.load(open(path, 'r'))
+
+    genere_dict = pickle.load(open("./constants/genreIndexer/0.out", 'r'))
 
     path = os.path.dirname(__file__) + '/../userLog/myUserBook'
     print bcolors.OKGREEN + "Recommendation Front Loding User Log\nFirst 10 User IDs" + bcolors.ENDC     

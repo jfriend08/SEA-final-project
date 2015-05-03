@@ -26,6 +26,13 @@ def main():
   mrf.mapReduce('constants/input_movie', 'src.documentStore.mapper', 3, 'src.documentStore.reducer', 'constants/documentStore')
   tornado.ioloop.IOLoop.instance().start()
 
+  print C.HEADER + "=========== Start Indexing Genre ===========" + C.ENDC
+  print C.OKBLUE + "Start genreIndexer" + C.ENDC
+  mrf.mapReduce('constants/input_movie', 'src.genreIndexer.mapper', 1, 'src.genreIndexer.reducer', 'constants/genreIndexer')
+  tornado.ioloop.IOLoop.instance().start()
+
+
+
   
   print C.HEADER + "=========== Start Indexing Reviews ===========" + C.ENDC
   print C.OKBLUE + "Start movieIndexer" + C.ENDC
