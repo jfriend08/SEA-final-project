@@ -30,7 +30,7 @@ def getMoreMovieName():
   global url
   url = 'http://www.imdb.com/calendar/?ref_=nv_mv_cal_5'
   IOLoop.current().run_sync(readHtml)
-  print body
+  # print body
   match = re.findall('.*href=".[^>]*>(.[^<]*)</a>', body)
   return match
 if __name__ == "__main__":
