@@ -77,9 +77,9 @@ class Inventory(object):
     basePort = int(hashlib.md5(getpass.getuser()).hexdigest()[:8], 16) % (maxPort - minPort) + minPort    
     return basePort
   
-  def saveJson(self, path):
+  def saveJson(self, path):    
     result = {"superfront":[url for url in self.SuperFront]
-    , "master":[url in self.master]
+    , "master":[url for url in self.master]
     , "movie": [url for url in self.movie]
     , "review": [url for url in self.review]
     , "index": [url for url in self.Index]

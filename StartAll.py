@@ -60,7 +60,7 @@ ClassifierServer = []
 
 
 NumSuperFront = 1 #the most frontend server to user
-NumMaster = 2 #the masterServer for 1. Search Engine 2. Recommendation System
+NumMaster = 3 #the masterServer for 1. Search Engine 2. Recommendation System 3. Classify
 NumMovie = 3 #for recommendation system
 NumReview = 3 #for recommendation system
 NumIdx = 3 #for search engine
@@ -84,6 +84,7 @@ def main():
   from recommendation import recom_worker, recom_front
   from searchEngine.backend import back as searchEng_worker
   from searchEngine.frontend import front as searchEng_front
+  from classification.backend import online as classifier
   # from recommendation import searchEng_worker, searchEng_front  
   import mapreduce.framework as framework
   from src import color  
@@ -106,46 +107,25 @@ def main():
   print C.OKBLUE + "DocServer:\t" + str(DocServer) + C.ENDC
   print C.OKBLUE + "ClassifierServer:\t" + str(ClassifierServer) + C.ENDC
   
-  print C.HEADER + "=========== Instantiate MapReduceFramework ===========" + C.ENDC
   
-  mrf = framework.MapReduceFramework()
-  mrf.getWorkerInfo('address.json')
-  
-
-  #print C.HEADER + "=========== Start Local Indexing ===========" + C.ENDC
-  # localIndexer.ReviewIndexing()
-  
-  print C.HEADER + "=========== Start Indexing Movies ===========" + C.ENDC
-  mrf.mapReduce('constants/input_movie', 'src.invertedIndexer.mapper', 7, 'src.invertedIndexer.reducer', 'constants/invertedIndex')
-  tornado.ioloop.IOLoop.instance().start()
-  mrf.mapReduce('constants/input_movie', 'src.idfBuilder.mapper', 1, 'src.idfBuilder.reducer', 'constants/idf')
-  tornado.ioloop.IOLoop.instance().start()
-  mrf.mapReduce('constants/input_movie', 'src.documentStore.mapper', 1, 'src.documentStore.reducer', 'constants/documentStore')
-  tornado.ioloop.IOLoop.instance().start()
-
-  print C.HEADER + "=========== Start Indexing Reviews ===========" + C.ENDC
-  mrf.mapReduce('constants/input_review', 'src.movieIndexer.mapper', 7, 'src.movieIndexer.reducer', 'constants/movieIndexer')
-  tornado.ioloop.IOLoop.instance().start()
-  mrf.mapReduce('constants/input_review', 'src.reviewIndexer.mapper', 1, 'src.reviewIndexer.reducer', 'constants/reviewIndexer')
-  tornado.ioloop.IOLoop.instance().start()
-  mrf.mapReduce('constants/input_review', 'src.genreIndexer.mapper', 1, 'src.genreIndexer.reducer', 'constants/genreIndexer')
-  tornado.ioloop.IOLoop.instance().start()
-  
-  
-
   print C.HEADER + "=========== Fire Up All Servers ===========" + C.ENDC
   uid = fork_processes(NumMaster+NumMovie+NumReview+NumIdx+NumDoc)
-  # uid = fork_processes(NumMaster+NumMovie+NumReview+NumIdx+NumDoc)
-  #uid = 1
+  
   if uid == 0:
     sockets = bind_sockets(masterServer[uid].split(':')[-1])
     myfront = recom_front.FrontEndApp(MovieServer, ReviewServer)
     server  = myfront.app
   elif uid ==1:
-    sockets = bind_sockets(masterServer[uid].split(':')[-1])
-    # myfront = searchEng_front.FrontEndApp(IdxServer, DocServer)
+    sockets = bind_sockets(masterServer[uid].split(':')[-1])    
     myfront = searchEng_front.FrontEndApp(IdxServer, DocServer)
     server  = myfront.app
+  elif uid ==2:    
+    sockets = bind_sockets(masterServer[uid].split(':')[-1])
+    myClasify = classifier.Application(([(r"/predict?", classifier.PredictionHandler)]))
+    myClasify.setGenres("./constants/classification_weights/genres.p")
+    myClasify.setWeights("./constants/classification_weights/big_weight.p")
+    server  = tornado.httpserver.HTTPServer(myClasify )        
+    
   elif uid < NumMaster + NumMovie:
     myIdx = uid - NumMaster
     sockets = bind_sockets(MovieServer[myIdx].split(':')[-1])    
@@ -165,10 +145,12 @@ def main():
       myIdx = uid-NumMovie-NumReview-NumIdx-NumMaster
       sockets = bind_sockets(DocServer[myIdx].split(':')[-1])    
       myback_doc = searchEng_worker.BackEndApp('DocServer', myIdx, DocServer[myIdx].split(':')[-1])
-      server  = myback_doc.app
+      server  = myback_doc.app  
 
+  
   server.add_sockets(sockets)
   tornado.ioloop.IOLoop.instance().start()
+  
 
 
 

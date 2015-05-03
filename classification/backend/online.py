@@ -13,8 +13,9 @@ class Application(tornado.web.Application):
 # http://127.0.0.1:15001/predict?description=celia&threshold=0.8
 class PredictionHandler(tornado.web.RequestHandler):
   @gen.coroutine
-  def get(self):
+  def get(self):    
     description = self.get_arguments('description')[0]
+    print "description%s" % description
     #threshold = float(self.get_arguments('threshold')[0])
     # trim the data
     s = str(description)

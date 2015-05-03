@@ -30,7 +30,7 @@ class MapReduceFramework:
   def mapReduce(self, inputDir, mapperPath, nReducers, reducerPath, outputDir):
     if len(self.workers)==0:
       print 'workers infomation has not been set!'
-      tornado.ioloop.IOLoop.current().stop()
+      # tornado.ioloop.IOLoop.current().stop()
 
 		# get all input files
     inputs = []
@@ -73,4 +73,4 @@ class MapReduceFramework:
       idx += 1
 
     print "========= FINISHED! =========="
-    tornado.ioloop.IOLoop.current().stop()
+    # tornado.ioloop.IOLoop.current().stop()
