@@ -117,7 +117,10 @@ class SearchHandler(tornado.web.RequestHandler):
         print "NormalResult\n%s" % NormalResult
         print "GenreResult\n%s" % GenreResult
         
-        toSuperFront = {'NormalResult':str(NormalResult), 'GenreResult': str(GenreResult)}
+        toSuperFront={}
+        toSuperFront['NormalResult'] = NormalResult
+        toSuperFront['GenreResult'] = GenreResult
+        
         self.write(json.dumps(toSuperFront))
         # self.write('<html><head><title>SEA search engine</title></head><body>%s</body></html>' % (body))
         
