@@ -4,6 +4,7 @@ Building up movie seach engine plus customized recommendation system
 #Constants files:
 [google drive](https://drive.google.com/folderview?id=0BzG5zLRRrgKwfkFPVHE5ZUZ2WGVZM28wUXZqUzU5WmhuZ3ZFdURTMzNYNzJNeVN2T1dGWWM&usp=sharing)
 
+
 # Working Procedure
 
 ## 1. Split data into many partitions
@@ -24,10 +25,33 @@ python -m classification.workers
 ```
 python -m Prepare
 ```
+## call mapreduce workers
+```
+python -m mapreduce.workers
 
+```
+## call classification workers
+```
+python -m classification.workers
+
+```
+##prepare pickle files for all servers 
+```
+python -m Prepare
+
+```
+
+##Start All the works
+
+Goal: 1. find ports, 2. indexing, 3. fire up all servers
+
+<<<<<<< HEAD
+```python
+=======
 ## 5. Start All servers
 Goal: 1. find ports, 2. fire up all servers
 ```
+>>>>>>> 798c3e4056310a7ef46a703de9ae47eb7f00bfb6
 python ./StartAll.py
 ```
 
