@@ -12,7 +12,7 @@ if __name__ == "__main__":
   try: 
     path =  sys.argv[1]
   except IndexError:
-    path = 'classifier_workers.json'
+    path = 'classification_workers.json'
 
   BASE_PORT = 10000
   for i in range(inventory.NUM_OF_MACHINES):

@@ -1,40 +1,44 @@
 (lp0
-S'Comedy'
+S'Action & Adventure'
 p1
-aS'Classics'
+aS'Animation'
 p2
-aS'Television'
+aS'Anime & Manga'
 p3
-aS'Special Interest'
+aS'Art House & International'
 p4
-aS'Horror'
+aS'Classics'
 p5
-aS'Mystery & Suspense'
+aS'Comedy'
 p6
 aS'Cult Movies'
 p7
-aS'Romance'
+aS'Documentary'
 p8
-aS'Musical & Performing Arts'
+aS'Drama'
 p9
 aS'Faith & Spirituality'
 p10
-aS'Sports & Fitness'
-p11
-aS'Western'
-p12
 aS'Gay & Lesbian'
-p13
-aS'Art House & International'
-p14
-aS'Animation'
-p15
+p11
+aS'Horror'
+p12
 aS'Kids & Family'
+p13
+aS'Musical & Performing Arts'
+p14
+aS'Mystery & Suspense'
+p15
+aS'Romance'
 p16
-aS'Anime & Manga'
-p17
 aS'Science Fiction & Fantasy'
+p17
+aS'Special Interest'
 p18
-aS'Documentary'
+aS'Sports & Fitness'
 p19
+aS'Television'
+p20
+aS'Western'
+p21
 a.

@@ -27,15 +27,20 @@
       </tr>
     </thead>
     <tbody>
+      {% for movie in search_result %}
+        <tr><td align="center">
+          {{ movie }}
+          
 
-      <tr><td align="center">
-        <form id='s_hunger game' method='POST' action='/review'>
-        <input type='hidden' name='mid' value='83773'>
-        <input type='hidden' name='title' value='hunger game'>
-        <a href="javascript:{}" onclick="document.getElementById('s_hunger game').submit();">Hunger Game</a>
-        </form>
-      </td></tr>
-
+          <a href="{{ movie[0] }}">{{ movie[1] }}</a>
+          <form id='s_hunger game' method='POST' action='/review'>
+          <input type='hidden' name='mid' value='83773'>
+          <input type='hidden' name='title' value='hunger game'>
+          <a href="javascript:{}" onclick="document.getElementById('s_hunger game').submit();">review it</a>
+          </form>
+        </td></tr>
+      {% endfor %}
+      <!--
       <tr><td align="center">
         <form id='s_avatar' method='POST' action='/review'>
         <input type='hidden' name='mid' value='87833'>
@@ -43,6 +48,7 @@
         <a href="javascript:{}" onclick="document.getElementById('s_avatar').submit();">Avatar</a>
         </form>
       </td></tr>
+      -->
       
     </tbody>
   </table>

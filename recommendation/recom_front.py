@@ -268,7 +268,7 @@ class recomHandler(tornado.web.RequestHandler):
       FinalList = sorted(FinalList, key=lambda tup: tup[1], reverse=True)    
       [toprint, NormalResult, GenreResult] = ToFormat(FinalList[:20], gener)
 
-      toSuperFront = {'NormalResult':str(NormalResult), 'GenreResult': str(GenreResult)}
+      toSuperFront = {'NormalResult':NormalResult, 'GenreResult': GenreResult}
       self.write(json.dumps(toSuperFront))
       # self.write(toprint)
 

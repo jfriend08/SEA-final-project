@@ -30,9 +30,6 @@ def main():
   print C.OKBLUE + "Start genreIndexer" + C.ENDC
   mrf.mapReduce('constants/input_movie', 'src.genreIndexer.mapper', 1, 'src.genreIndexer.reducer', 'constants/genreIndexer')
   tornado.ioloop.IOLoop.instance().start()
-
-
-
   
   print C.HEADER + "=========== Start Indexing Reviews ===========" + C.ENDC
   print C.OKBLUE + "Start movieIndexer" + C.ENDC
@@ -43,7 +40,7 @@ def main():
   tornado.ioloop.IOLoop.instance().start()
 
   print C.HEADER + "=========== Start Classification Training ===========" + C.ENDC
-  worker_address = 'classification_worker.json'
+  worker_address = 'classification_workers.json'
   raw_data = 'constants/Genre_dict'
   raw_data = 'constants/Genre_dictII_9500'
   training_set = 'constants/training_set.p'
@@ -51,7 +48,7 @@ def main():
   tn = trainer.Trainer()
   tn.setWorkerInfo(worker_address)
   genres = tn.processRawData(raw_data, training_set)
-  tn.setTraningParameter(0.9, 200, 0.01)
+  tn.setTraningParameter(0.9, 500, 0.01)
   tn.train(training_set, genres, weights_dir)
   tornado.ioloop.IOLoop.instance().start()
   tn.generateWeightTable(weights_dir)
