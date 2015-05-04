@@ -76,6 +76,9 @@ class MainHandler(webapp2.RequestHandler):
   def get(self):
     query = self.request.get('q')
     genres = []
+    search_result = []
+    recom_genre = []
+    recom_normal = []
     if query:
       # deal with classifier
       url = self.formClassifierUrl(query)
@@ -92,17 +95,17 @@ class MainHandler(webapp2.RequestHandler):
       #self.response.write(url+'<br>')
       result = urlfetch.fetch(url)
       j = json.loads(result.content)
-      search_genre = j['GenreResult']
-      search_normal = j['NormalResult']
-      search_result = search_genre + search_normal
+      #search_genre = j['GenreResult']
+      #search_normal = j['NormalResult']
+      search_result += j['GenreResult'] + j['NormalResult']
 
     
     user = users.get_current_user()
     if user:
       # deal with search engine
       link = users.create_logout_url('/')
-      #url = self.formrecommendUrl(user.user_id(), genres)
-      url = self.formrecommendUrl('7f2b697d-d53a-4301-86a8-7ff5750d01e9', genres)
+      url = self.formrecommendUrl(user.user_id(), genres)
+      #url = self.formrecommendUrl('7f2b697d-d53a-4301-86a8-7ff5750d01e9', genres)
       #self.response.write(url+'<br>')
       result = urlfetch.fetch(url)
       recom_genre = json.loads(result.content)['GenreResult']
@@ -111,6 +114,7 @@ class MainHandler(webapp2.RequestHandler):
 
     else:
       link = users.create_login_url('/')
+
     template_values = {'user': user, 'link': link , 'query': query, 'search_result': search_result, 'recom_genre': recom_genre, 'recom_normal': recom_normal }
     template = JINJA_ENVIRONMENT.get_template('template/search.html')
     self.response.write(template.render(template_values))

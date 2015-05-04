@@ -15,8 +15,6 @@ class BackendInfo:
     self.info['search'].append(temp[1])
     self.info['recommend'] = []
     self.info['recommend'].append(temp[0])
-    self.info['rate'] = []
-    self.info['rate'].append('http://www.google.com')
     print self.info
 
 if __name__ == "__main__":

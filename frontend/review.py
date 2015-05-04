@@ -27,7 +27,7 @@ import urllib2
 
 backend = backendInfo.BackendInfo('config/workers.json')
 
-nRater = len(backend.info['rate'])
+nRater = len(backend.info['recommend'])
 curRater = 0
 
 JINJA_ENVIRONMENT = jinja2.Environment(
@@ -38,12 +38,12 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 class ReviewHandler(webapp2.RequestHandler):
   def formRateUrl(self, uid, mid, rate):
     global curRater
-    worker = backend.info['rate'][curRater]
+    worker = backend.info['recommend'][curRater]
     curRater += 1
     if curRater == nRater: curRater = 0
     query = {}
-    query['uid'] = uid
-    query['mid'] = mid
+    query['user'] = uid
+    query['movieID'] = mid
     query['rating'] = rate
     s = urllib.urlencode(query)
     return worker+'/update?'+s
@@ -53,12 +53,14 @@ class ReviewHandler(webapp2.RequestHandler):
     title = self.request.get('title')
     user = users.get_current_user()
     link = users.create_logout_url('/')
+    saved = False
     if rate:
       url = self.formRateUrl(user.user_id(), mid, rate)
-      #response = urlfetch.fetch(url)
+      self.response.write(url)
+      response = urlfetch.fetch(url)
       #result = json.loads(response.content)
-      self.redirect("/")
-    template_values = {'user': user, 'link': link , 'mid': mid, 'title': title}
+      saved = True
+    template_values = {'user': user, 'link': link , 'mid': mid, 'title': title, 'saved': saved}
     template = JINJA_ENVIRONMENT.get_template('template/review.html')
     self.response.write(template.render(template_values))
 
