@@ -78,6 +78,10 @@ class SearchHandler(tornado.web.RequestHandler):
         report=[]
         # body = 'Number of results: %s <br>\n<ol>' % minN
         body = '<font size="5" color="blue">Top %s search results:</font><br>\n<ol>' % minN
+        
+        NormalResult = []
+        GenreResult = []
+
         for i in range(min(K,len(doc_list))):                                                            
             
             Docidx = hash(str(doc_list[i][0]))%NumDocServer
@@ -103,11 +107,19 @@ class SearchHandler(tornado.web.RequestHandler):
 
             if Highlight_bit:
                 body += '<li><a href=%s><font color="red">%s</font></a><br>DocId: %s<br>%s<br><img src=%s alt="HTML5 Icon" ></li>' % (n['url'], n['title'], n['docID'], n['snippet'], n['posterurl'])
+                NormalResult.append([n['url'], n['title'], n['docID'], n['snippet'], n['posterurl']])
+                GenreResult.append([n['url'], n['title'], n['docID'], n['snippet'], n['posterurl']])
             else:
                 body += '<li><a href=%s>%s</a><br>DocId: %s<br>%s<br><img src=%s alt="HTML5 Icon" ></li>' % (n['url'], n['title'], n['docID'], n['snippet'], n['posterurl'])
+                NormalResult.append([n['url'], n['title'], n['docID'], n['snippet'], n['posterurl']])
 
         body += '</ol>'
-        self.write('<html><head><title>SEA search engine</title></head><body>%s</body></html>' % (body))
+        print "NormalResult\n%s" % NormalResult
+        print "GenreResult\n%s" % GenreResult
+        
+        toSuperFront = {'NormalResult':str(NormalResult), 'GenreResult': str(GenreResult)}
+        self.write(json.dumps(toSuperFront))
+        # self.write('<html><head><title>SEA search engine</title></head><body>%s</body></html>' % (body))
         
 
 
