@@ -12,10 +12,10 @@ import argparse
 
 def getArguments(argv):
   parser = argparse.ArgumentParser()
-  parser.add_argument('nClassificationWorker', default=5, metavar='<PATH_TO_MAPPER>', help='Input file name')
-  parser.add_argument('nMapreduceWorker', default=5, metavar='<PATH_TO_REDUCER>', help='Input file name')
-  parser.add_argument('--jsonPath', default='prework_workers.json',metavar='<PATH_TO_JOB_DIR>', help='Input file name')
-  parser.add_argument('--startPort', default=10000,metavar='<PATH_TO_JOB_DIR>', help='Input file name')
+  parser.add_argument('nClassificationWorker', required=False, default=5, metavar='<PATH_TO_MAPPER>', help='Input file name')
+  parser.add_argument('nMapreduceWorker', required=False, default=5, metavar='<PATH_TO_REDUCER>', help='Input file name')
+  parser.add_argument('--jsonPath', required=False, default='prework_workers.json',metavar='<PATH_TO_JOB_DIR>', help='Input file name')
+  parser.add_argument('--startPort', required=False,, default=10000,metavar='<PATH_TO_JOB_DIR>', help='Input file name')
   return parser.parse_args(argv)
 
 if __name__ == "__main__":

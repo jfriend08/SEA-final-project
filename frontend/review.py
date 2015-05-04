@@ -56,7 +56,7 @@ class ReviewHandler(webapp2.RequestHandler):
     saved = False
     if rate:
       url = self.formRateUrl(user.user_id(), mid, rate)
-      self.response.write(url)
+      #self.response.write(url)
       response = urlfetch.fetch(url)
       #result = json.loads(response.content)
       saved = True
