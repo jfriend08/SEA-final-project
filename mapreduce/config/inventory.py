@@ -17,10 +17,11 @@ def releaseWorker(address):
 	else:
 		return False
 
-def toJson(dir='.'):
-	f = open(dir+'/address.json', "w")
+def toJson(path):
+	f = open(path, "w")
 	f.write(json.dumps(MACHINES_IN_USE))
 	f.close()
+	print 'Machines\' info has been written to \"'+path + '\"'  
 
 
 

@@ -10,7 +10,7 @@ def main():
 
   print C.HEADER + "=========== Instantiate MapReduceFramework ===========" + C.ENDC  
   mrf = framework.MapReduceFramework()
-  mrf.getWorkerInfo('address.json')
+  mrf.getWorkerInfo('mapreduce_workers.json')
   
   #print C.HEADER + "=========== Start Local Indexing ===========" + C.ENDC
   # localIndexer.ReviewIndexing()
@@ -43,7 +43,7 @@ def main():
   tornado.ioloop.IOLoop.instance().start()
 
   print C.HEADER + "=========== Start Classification Training ===========" + C.ENDC
-  worker_address = 'classification/worker_address.json'
+  worker_address = 'classification_worker.json'
   raw_data = 'constants/Genre_dict'
   raw_data = 'constants/Genre_dictII_9500'
   training_set = 'constants/training_set.p'
