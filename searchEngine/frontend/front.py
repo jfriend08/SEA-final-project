@@ -121,8 +121,8 @@ class SearchHandler(tornado.web.RequestHandler):
         toSuperFront['NormalResult'] = NormalResult
         toSuperFront['GenreResult'] = GenreResult
         
-        # self.write(json.dumps(toSuperFront))
-        self.write('<html><head><title>SEA search engine</title></head><body>%s</body></html>' % (body))
+        self.write(json.dumps(toSuperFront))
+        # self.write('<html><head><title>SEA search engine</title></head><body>%s</body></html>' % (body))
         
 
 
