@@ -94,6 +94,10 @@ def printMatrix(matrix):
 
 def ToFormat(mylist, genre):
   global movie_dict, genere_dict
+  
+  NormalResult = []
+  GenreResult = []
+
   body = '<font size="5" color="blue">Top %s Recommended Movies</font><br>\n<ul>' % len(mylist)
   for i in xrange(len(mylist)):
     
@@ -109,11 +113,14 @@ def ToFormat(mylist, genre):
       pass
     if Highlight_bit:
       body += '<li><a href=%s><font color="red">Title: %s</font></a><br>MovieID: %s<br>WeightedRating: %s<br><img src=%s alt="HTML5 Icon" ></li>' % ("http://www.rottentomatoes.com/m/"+movie_dict[mylist[i][0]]['title'].replace(",", "").replace(".", "").replace(":", "").replace(" - ", "_").replace(" ", "_"), movie_dict[mylist[i][0]]['title'], mylist[i][0], mylist[i][1], movie_dict[mylist[i][0]]['posters']['profile'])
+      NormalResult.append(["http://www.rottentomatoes.com/m/"+movie_dict[mylist[i][0]]['title'].replace(",", "").replace(".", "").replace(":", "").replace(" - ", "_").replace(" ", "_"), movie_dict[mylist[i][0]]['title'], mylist[i][0], mylist[i][1], movie_dict[mylist[i][0]]['posters']['profile']])
+      GenreResult.append(["http://www.rottentomatoes.com/m/"+movie_dict[mylist[i][0]]['title'].replace(",", "").replace(".", "").replace(":", "").replace(" - ", "_").replace(" ", "_"), movie_dict[mylist[i][0]]['title'], mylist[i][0], mylist[i][1], movie_dict[mylist[i][0]]['posters']['profile']])
     else:
       body += '<li>Title: <a href=%s>%s</a><br>MovieID: %s<br>WeightedRating: %s<br><img src=%s alt="HTML5 Icon" ></li>' % ("http://www.rottentomatoes.com/m/"+movie_dict[mylist[i][0]]['title'].replace(",", "").replace(".", "").replace(":", "").replace(" - ", "_").replace(" ", "_"), movie_dict[mylist[i][0]]['title'], mylist[i][0], mylist[i][1], movie_dict[mylist[i][0]]['posters']['profile'])
+      NormalResult.append(["http://www.rottentomatoes.com/m/"+movie_dict[mylist[i][0]]['title'].replace(",", "").replace(".", "").replace(":", "").replace(" - ", "_").replace(" ", "_"), movie_dict[mylist[i][0]]['title'], mylist[i][0], mylist[i][1], movie_dict[mylist[i][0]]['posters']['profile']])
     # body += '<li><a href=%s>%s</a><br>DocId: %s<br>%s</li>' % (n['url'], n['title'], n['docID'], n['snippet'])
   body += '</ul>'
-  return body
+  return (body, NormalResult, GenreResult)
 
 def calCoefficientFromFrequency_dict(freqDict, userPreference, user):
   '''
@@ -259,8 +266,11 @@ class recomHandler(tornado.web.RequestHandler):
 
       #Sort tuple list
       FinalList = sorted(FinalList, key=lambda tup: tup[1], reverse=True)    
-      toprint = ToFormat(FinalList[:20], gener)
-      self.write(toprint)
+      [toprint, NormalResult, GenreResult] = ToFormat(FinalList[:20], gener)
+
+      toSuperFront = {'NormalResult':str(NormalResult), 'GenreResult': str(GenreResult)}
+      self.write(json.dumps(toSuperFront))
+      # self.write(toprint)
 
     except:
       self.write("User<strong> %s </strong>does not have review history in system" % userID)
