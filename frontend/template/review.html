@@ -4,14 +4,23 @@
 <!-- search bar -->
 <div class='container-fluid'>
 <center>
-  <form id='search' role='form' method='POST' action='/review'>
+  {% if saved %}
+    <div class='col-lg-5' style='font-size:150%'>
+      Your review on "{{ title }}"" has been saved.
+    </div>
+    <br>
+    <div class='col-lg-5'>
+      <input class='btn btn-warning' action="action" type="button" value="Back to the homepage" onclick="location.href='/'" />
+    </div>
+  {% else %}
   <div class='col-lg-5' style='font-size:150%'>
     {{ title }}
   </div>
-  <input type='hidden' name='mid' value='{{ mid }}'>
-  <input type='hidden' name='title' value='{{ title }}'>
-  <hr>
-  <div class='col-lg-5'>
+  <form id='search' role='form' method='POST' action='/review'>
+    <input type='hidden' name='mid' value='{{ mid }}'>
+    <input type='hidden' name='title' value='{{ title }}'>
+    <hr>
+    <div class='col-lg-5'>
       <input type="radio" name="rate" value="10"> 1
       <input type="radio" name="rate" value="20"> 2
       <input type="radio" name="rate" value="30"> 3
@@ -22,13 +31,14 @@
       <input type="radio" name="rate" value="80"> 8
       <input type="radio" name="rate" value="90"> 9
       <input type="radio" name="rate" value="100"> 10
-  </div>
-  <hr>
-  <div class='col-lg-5'>
-  <input class='btn btn-warning' action="action" type="button" value="Back" onclick="history.go(-1);" />
-    <input class='btn btn-success' type='submit' value='Submit'>
-  </div>
+    </div>
+    <hr>
+    <div class='col-lg-5'>
+      <input class='btn btn-warning' action="action" type="button" value="Back" onclick="history.go(-1);" />
+      <input class='btn btn-success' type='submit' value='Submit'>
+    </div>
   </form>
+  {% endif %}
 </center>
 </div>
 {% endblock %}
