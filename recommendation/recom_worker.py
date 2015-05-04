@@ -21,6 +21,7 @@ sys.path.append('../')
 from src import color
 bcolors = color.bcolors()
 
+invertedIndex = {}
 
 '''
 recom_worker has two part: 1. movieHandler 2. reviewHandler. 
@@ -37,12 +38,44 @@ class Application(tornado.web.Application):
       if (server == 'MovieServer'):
         handlers = [(r"/movie", movieHandler)]
       elif (server == 'ReviewServer'):
-        handlers = [(r"/review", reviewHandler)]
+        handlers = [(r"/review", reviewHandler), (r"/findHistory", findHistoryHandler), (r"/update", updateHandler)]      
       else:
         raise NameError('wrong server name')
       tornado.web.Application.__init__(self, handlers)  
+class updateHandler(tornado.web.RequestHandler):
+  @gen.coroutine            
+  def get(self):
+    global invertedIndex, tokenizer
+    userID = self.get_argument('user', None)
+    userID = str(userID)
+    print "Hi!!!%s"%userID
+    movieID = self.get_argument('movieID', None)
+    rating = self.get_argument('rating', None)
+    if userID in invertedIndex:
+      invertedIndex[userID].append((movieID, rating))
+    else:
+      invertedIndex[userID] = [(movieID, rating)]
+    
+    print "invertedIndex[userID] in updateHandler:%s"%invertedIndex[userID]
 
 
+class findHistoryHandler(tornado.web.RequestHandler):
+  @gen.coroutine            
+  def get(self):
+    global invertedIndex, tokenizer
+    # print "len(invertedIndex.keys()): %s" %len(invertedIndex.keys())
+    # print invertedIndex.keys()
+    result = {}
+    userID = self.get_argument('user', None)
+    userID = str(userID)
+    print userID    
+    print invertedIndex[userID]
+    
+    try:
+      result[userID] = invertedIndex[userID]
+    except:
+      result[userID] = []
+    self.write(json.dumps(result))
 
 class movieHandler(tornado.web.RequestHandler):
   @gen.coroutine            
