@@ -132,25 +132,28 @@ def tomatoMovieSearch2FS():
 def tomatoReviewSeach():
   global Movies, IDs, Movie_dict, Review_dict   
   for myid in IDs:    
-    pageNum=1    
-    toFetch = CM.ReviewSearch(myid,pageNum)   
-    print toFetch
-    data = _load_json_from_url(toFetch)   
-    print data
-    time.sleep(0.4)   
-    print bcolors.OKGREEN + "MovieID:\t%s\tTitle:\t%s\tTotal Reviews:\t%d" %(myid, Movie_dict[myid]['title'], data['total']) + bcolors.ENDC   
-    
-    #API only provide 50 reviews per page, so fetching more pages if total review is more than 50
-    if(data['total']>50):
-      loop = int((data['total']+49)/50)-1
-      for i in range(loop):
-        pageNum+=1        
-        toFetch = CM.ReviewSearch(myid,pageNum)   
-        new_data= _load_json_from_url(toFetch)
-        data['reviews'].extend(new_data['reviews'])               
-        time.sleep(0.4) #tomato server will not happy if you fetch too fast    
-    
-    Review_dict[myid] = data
+    try:
+      pageNum=1    
+      toFetch = CM.ReviewSearch(myid,pageNum)   
+      print toFetch
+      data = _load_json_from_url(toFetch)   
+      print data
+      time.sleep(0.4)   
+      # print bcolors.OKGREEN + "MovieID:\t%s\tTitle:\t%s\tTotal Reviews:\t%d" %(myid, Movie_dict[myid]['title'], data['total']) + bcolors.ENDC   
+      print bcolors.OKGREEN + "MovieID:\t%sTotal Reviews:\t%d" %(myid, data['total']) + bcolors.ENDC   
+      #API only provide 50 reviews per page, so fetching more pages if total review is more than 50
+      if(data['total']>50):
+        loop = int((data['total']+49)/50)-1
+        for i in range(loop):
+          pageNum+=1        
+          toFetch = CM.ReviewSearch(myid,pageNum)   
+          new_data= _load_json_from_url(toFetch)
+          print bcolors.OKGREEN + "MovieID:\t%sTotal Reviews:\t%d" %(myid, new_data['total']) + bcolors.ENDC   
+          data['reviews'].extend(new_data['reviews'])               
+          time.sleep(0.4) #tomato server will not happy if you fetch too fast        
+      Review_dict[myid] = data
+    except:
+      pass
 
 
 """
@@ -221,13 +224,14 @@ def main2NormalDict():
 
   Movie_dict = pickle.load(open('../constants/Movie_dictII', 'r'))
   IDs = list(Movie_dict.keys())
-  IDs = IDs[:9000]
+  print "IDs length:%s"%len(IDs)
+  IDs = IDs[3000:8500]
   Movie_dict = {}
-  # print "IDs length:%s"%len(IDs)
+  print "IDs length:%s"%len(IDs)
   
   print bcolors.HEADER + "====== START: tomatoReviewSeach ======" + bcolors.ENDC  
   tornado.ioloop.IOLoop.current().run_sync(tomatoReviewSeach)    
-  savePickle('../constants/Review_dictII', Review_dict) #this is just for current usage
+  savePickle('../constants/Review_dictII_2', Review_dict) #this is just for current usage
 
   # print bcolors.HEADER + "====== START: Genre Seach ======" + bcolors.ENDC
   # tornado.ioloop.IOLoop.current().run_sync(tomatoGenreSearch)    
@@ -238,7 +242,7 @@ def main2Genre():
   print bcolors.HEADER + "====== START: Loading Movie Dict ======" + bcolors.ENDC
   Movie_dict = pickle.load(open('../constants/Movie_dictII', 'r'))
   IDs = list(Movie_dict.keys())
-  IDs = IDs[:9500]
+  IDs = IDs[3000:8500]
 
   print bcolors.OKBLUE + "Number of IDs: " +  str(len(IDs)) + bcolors.ENDC  
 
@@ -251,8 +255,8 @@ def main2Genre():
 
 
 if __name__ == "__main__":        
-  main2Genre()
-  # main2NormalDict() 
+  # main2Genre()
+  main2NormalDict() 
 #   print "hi"
 #   # main2FS()
   

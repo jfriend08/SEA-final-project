@@ -73,7 +73,7 @@ class reviewHandler(tornado.web.RequestHandler):
     global invertedIndex, tokenizer
     ALLcritic = self.get_argument('critics', None)        
     ALLcritic = [t.replace("_", " ") for t in tokenizer.tokenize(ALLcritic)]
-    print "ALLcritic:\n%s" % ALLcritic
+    # print "ALLcritic:\n%s" % ALLcritic
 
     result = {}
     for eachCritic in ALLcritic:
@@ -95,10 +95,10 @@ class RecommApp(object):
     global invertedIndex, tokenizer
     if (serverType=='MovieServer'):
       pass
-      path = os.path.dirname(__file__) + '/../constants/Movie_Index' + str(serverNum)      
+      path = os.path.dirname(__file__) + '/../constants/movieIndexer/' + str(serverNum) + '.out'
     elif (serverType=='ReviewServer'):
       pass
-      path = os.path.dirname(__file__) + '/../constants/Review_Index' + str(serverNum)
+      path = os.path.dirname(__file__) + '/../constants/reviewIndexer/' + str(serverNum) + '.out'
     else:
       raise NameError('path error')    
     

@@ -74,4 +74,4 @@ class MapReduceFramework:
       idx += 1
 
     print "========= FINISHED! =========="
-    # tornado.ioloop.IOLoop.current().stop()
+    tornado.ioloop.IOLoop.current().stop()
