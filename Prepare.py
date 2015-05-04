@@ -16,19 +16,30 @@ def main():
   # localIndexer.ReviewIndexing()
   
   print C.HEADER + "=========== Start Indexing Movies ===========" + C.ENDC
-  mrf.mapReduce('constants/input_movie', 'src.invertedIndexer.mapper', 7, 'src.invertedIndexer.reducer', 'constants/invertedIndex')
-  #tornado.ioloop.IOLoop.current().run_sync(mrf.mapReduce('constants/input_movie', 'src.invertedIndexer.mapper', 7, 'src.invertedIndexer.reducer', 'constants/invertedIndex'))
+  print C.OKBLUE + "Start invertedIndexer" + C.ENDC
+  mrf.mapReduce('constants/input_movie', 'src.invertedIndexer.mapper', 3, 'src.invertedIndexer.reducer', 'constants/invertedIndex')  
   tornado.ioloop.IOLoop.instance().start()
+  print C.OKBLUE + "Start idfBuilder" + C.ENDC
   mrf.mapReduce('constants/input_movie', 'src.idfBuilder.mapper', 1, 'src.idfBuilder.reducer', 'constants/idf')
   tornado.ioloop.IOLoop.instance().start()
-  mrf.mapReduce('constants/input_movie', 'src.documentStore.mapper', 1, 'src.documentStore.reducer', 'constants/documentStore')
+  print C.OKBLUE + "Start documentStore" + C.ENDC
+  mrf.mapReduce('constants/input_movie', 'src.documentStore.mapper', 3, 'src.documentStore.reducer', 'constants/documentStore')
   tornado.ioloop.IOLoop.instance().start()
+
+  print C.HEADER + "=========== Start Indexing Genre ===========" + C.ENDC
+  print C.OKBLUE + "Start genreIndexer" + C.ENDC
+  mrf.mapReduce('constants/input_movie', 'src.genreIndexer.mapper', 1, 'src.genreIndexer.reducer', 'constants/genreIndexer')
+  tornado.ioloop.IOLoop.instance().start()
+
+
 
   
   print C.HEADER + "=========== Start Indexing Reviews ===========" + C.ENDC
-  mrf.mapReduce('constants/input_review', 'src.movieIndexer.mapper', 7, 'src.movieIndexer.reducer', 'constants/movieIndexer')
+  print C.OKBLUE + "Start movieIndexer" + C.ENDC
+  mrf.mapReduce('constants/input_review', 'src.movieIndexer.mapper', 3, 'src.movieIndexer.reducer', 'constants/movieIndexer')
   tornado.ioloop.IOLoop.instance().start()
-  mrf.mapReduce('constants/input_review', 'src.reviewIndexer.mapper', 1, 'src.reviewIndexer.reducer', 'constants/reviewIndexer')
+  print C.OKBLUE + "Start reviewIndexer" + C.ENDC
+  mrf.mapReduce('constants/input_review', 'src.reviewIndexer.mapper', 3, 'src.reviewIndexer.reducer', 'constants/reviewIndexer')
   tornado.ioloop.IOLoop.instance().start()
 
   print C.HEADER + "=========== Start Classification Training ===========" + C.ENDC
