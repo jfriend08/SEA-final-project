@@ -71,13 +71,14 @@ NumClassifier = 4 #for classifier
 def getPorts():
   global SuperFront, masterServer, MovieServer, ReviewServer, IdxServer, DocServer, Baseport, ClassifierServer
   from recommendation import inventory  
-  guessPort = 27375 #will start with this port and find the avaliable ports
-  # guessPort = 28300 #will start with this port and find the avaliable ports
+  #guessPort = 27375 #will start with this port and find the avaliable ports
+  guessPort = 28300 #will start with this port and find the avaliable ports
   allserver = inventory.Inventory()
   Baseport = allserver.callBasePort(guessPort)
   allserver.findPorts( socket.gethostname(), NumSuperFront, NumMaster, NumMovie, NumReview, NumIdx, NumDoc, NumClassifier, Baseport)
   (SuperFront, masterServer, MovieServer, ReviewServer, IdxServer, DocServer, ClassifierServer) = allserver.getAllPorts()   
   allserver.saveJson('./constants') #save all the port info as workers.json to the path you specified 
+  allserver.saveJson('./frontend/config') #save all the port info as workers.json to the path you specified 
 
 
 def main():

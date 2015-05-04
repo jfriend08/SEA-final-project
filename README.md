@@ -43,15 +43,8 @@ python -m Prepare
 
 ##Start All the works
 
-Goal: 1. find ports, 2. indexing, 3. fire up all servers
-
-<<<<<<< HEAD
-```python
-=======
-## 5. Start All servers
 Goal: 1. find ports, 2. fire up all servers
 ```
->>>>>>> 798c3e4056310a7ef46a703de9ae47eb7f00bfb6
 python ./StartAll.py
 ```
 

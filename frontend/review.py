@@ -44,9 +44,9 @@ class ReviewHandler(webapp2.RequestHandler):
     query = {}
     query['uid'] = uid
     query['mid'] = mid
-    query['rate'] = rate
+    query['rating'] = rate
     s = urllib.urlencode(query)
-    return 'http://'+worker+'/recommand?'+s
+    return worker+'/update?'+s
   def post(self):
     mid = self.request.get('mid')
     rate = self.request.get('rate')
