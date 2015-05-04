@@ -79,28 +79,22 @@ class MainHandler(webapp2.RequestHandler):
     if query:
       # deal with classifier
       url = self.formClassifierUrl(query)
-      self.response.write(url+'<br>')
+      #self.response.write(url+'<br>')
       result = urlfetch.fetch(url)
       scores = json.loads(result.content)['scores']
       #self.response.write(str(scores)+'<br>')
       for pair in scores:
         if pair[1] >= 1.0:
           genres.append(str(pair[0]))
-      self.response.write(str(genres)+'<br>')
+      #self.response.write(str(genres)+'<br>')
       # deal with search engine
       url = self.formSearchUrl(query, genres)
-      self.response.write(url+'<br>')
+      #self.response.write(url+'<br>')
       result = urlfetch.fetch(url)
       j = json.loads(result.content)
-      print type(j)
-      print j
       search_genre = j['GenreResult']
       search_normal = j['NormalResult']
       search_result = search_genre + search_normal
-      print type(search_result)
-      #print search_result
-      #for movie in search_result:
-      #  print movie
 
     
     user = users.get_current_user()
@@ -109,16 +103,15 @@ class MainHandler(webapp2.RequestHandler):
       link = users.create_logout_url('/')
       #url = self.formrecommendUrl(user.user_id(), genres)
       url = self.formrecommendUrl('7f2b697d-d53a-4301-86a8-7ff5750d01e9', genres)
-      self.response.write(url+'<br>')
+      #self.response.write(url+'<br>')
       result = urlfetch.fetch(url)
       recom_genre = json.loads(result.content)['GenreResult']
       recom_normal = json.loads(result.content)['NormalResult']
-      #print recom_genre
       #print recom_normal
 
     else:
       link = users.create_login_url('/')
-    template_values = {'user': user, 'link': link , 'query': query, 'search_result': search_result}
+    template_values = {'user': user, 'link': link , 'query': query, 'search_result': search_result, 'recom_genre': recom_genre, 'recom_normal': recom_normal }
     template = JINJA_ENVIRONMENT.get_template('template/search.html')
     self.response.write(template.render(template_values))
 

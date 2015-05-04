@@ -88,6 +88,31 @@ def RatingConversion(rating):
   
   return myNewVal
 
+def findHistory(myid):
+  global UserBook
+  MovieHistory = []
+  ScoreHistory = []
+  idx = hash(myid) % len(ports_review)
+  if myid in UserBook:
+    MovieHistory = [movie for (movie, score) in UserBook[myid]]
+    ScoreHistory = [score for (movie, score) in UserBook[myid]]
+  else:
+    try:
+      toFetch = "%s/findHistory?user=%s" %(ports_review[idx],myid)
+      print "Fetch ReviewServer for findHistory: %s" % toFetch
+      http_client = AsyncHTTPClient()                                
+      response = yield http_client.fetch(toFetch)            
+      mydict = json.loads(response.body)
+      MovieHistory = [movie for (movie, score) in mydict['results']]
+      ScoreHistory = [score for (movie, score) in mydict['results']]
+    except:
+      pass
+
+  # return (MovieHistory, ScoreHistory)
+    
+    
+  
+
 def printMatrix(matrix):
   for i in xrange(len(matrix)):
     print matrix[i]    
@@ -212,6 +237,7 @@ class recomHandler(tornado.web.RequestHandler):
     try:
       MovieHistory = [movie for (movie, score) in UserBook[userID]]
       ScoreHistory = [score for (movie, score) in UserBook[userID]]
+      # (MovieHistory, ScoreHistory) = findHistory(userID)      
       myAllReturn_dict = {}
       
       
@@ -267,8 +293,11 @@ class recomHandler(tornado.web.RequestHandler):
       #Sort tuple list
       FinalList = sorted(FinalList, key=lambda tup: tup[1], reverse=True)    
       [toprint, NormalResult, GenreResult] = ToFormat(FinalList[:20], gener)
-
-      toSuperFront = {'NormalResult':NormalResult, 'GenreResult': GenreResult}
+      
+      toSuperFront={}
+      toSuperFront['NormalResult'] = NormalResult
+      toSuperFront['GenreResult'] = GenreResult
+      
       self.write(json.dumps(toSuperFront))
       # self.write(toprint)
 

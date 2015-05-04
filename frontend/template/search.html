@@ -18,8 +18,8 @@
 </div>
 <p>&nbsp;</p>
 <!-- search result -->
-<div class='container' style='float:left;width:10%'>&nbsp;</div>
-<div class='container' style="float:left;width:40%;">
+<div class='container' style='float:left;width:5%'>&nbsp;</div>
+<div class='container' style="float:left;width:45%;">
   <table class="table table-hover">
     <thead>
       <tr>
@@ -28,16 +28,18 @@
     </thead>
     <tbody>
       {% for movie in search_result %}
-        <tr><td align="center">
-          {{ movie }}
-          
-
-          <a href="{{ movie[0] }}">{{ movie[1] }}</a>
-          <form id='s_hunger game' method='POST' action='/review'>
-          <input type='hidden' name='mid' value='83773'>
-          <input type='hidden' name='title' value='hunger game'>
-          <a href="javascript:{}" onclick="document.getElementById('s_hunger game').submit();">review it</a>
-          </form>
+        <tr><td>
+          <div style="float:left;width:85%">
+            <a href="{{ movie[0] }}">{{ movie[1] }}</a> ( id:{{ movie[2]}} ) <br> {{ movie[3]|safe }} 
+            <form id='{{ movie[2] }}' method='POST' action='/review'>
+            <input type='hidden' name='mid' value='{{ movie[2] }}}'>
+            <input type='hidden' name='title' value='{{ movie[1] }}'>
+            <a href="javascript:{}" onclick="document.getElementById('{{ movie[2] }}').submit();">review it</a>
+            </form>
+          </div> 
+          <div style="float:left;width:15%">
+            <img src="{{ movie[4] }}" stype="width:100%" >
+          </div>
         </td></tr>
       {% endfor %}
       <!--
@@ -54,7 +56,7 @@
   </table>
 </div>
 <!-- recommand result -->
-<div class='container' style="float:left;width:40%;">
+<div class='container' style="float:left;width:45%;">
   <table class="table table-hover">
     <thead>
       <tr>
@@ -62,23 +64,22 @@
       </tr>
     </thead>
     <tbody>
-
-      <tr><td align="center">
-        <form id='b_hunger game' method='POST' action='/review'>
-        <input type='hidden' name='mid' value='83773'>
-        <input type='hidden' name='title' value='hunger game'>
-        <a href="javascript:{}" onclick="document.getElementById('b_hunger game').submit();">Hunger Game</a>
-        </form>
-      </td></tr>
-
-      <tr><td align="center">
-        <form id='b_avatar' method='POST' action='/review'>
-        <input type='hidden' name='mid' value='87833'>
-        <input type='hidden' name='title' value='avatar'>
-        <a href="javascript:{}" onclick="document.getElementById('b_avatar').submit();">Avatar</a>
-        </form>
-      </td></tr>
-
+      {% for movie in recom_genre %}
+        <tr><td>
+          <div style="float:left;width:85%">
+            <a href="{{ movie[0] }}">{{ movie[1] }}</a> <br> 
+            ( id: {{ movie[2]}}, rating: {{ movie[3]|safe }} )
+            <form id='{{ movie[2] }}' method='POST' action='/review'>
+            <input type='hidden' name='mid' value='{{ movie[2] }}}'>
+            <input type='hidden' name='title' value='{{ movie[1] }}'>
+            <a href="javascript:{}" onclick="document.getElementById('{{ movie[2] }}').submit();">review it</a>
+            </form>
+          </div> 
+          <div style="float:left;width:15%">
+            <img src="{{ movie[4] }}" stype="width:100%" >
+          </div>
+        </td></tr>
+      {% endfor %}
     </tbody>
   </table>
   <table class="table table-hover">
@@ -89,21 +90,22 @@
     </thead>
     <tbody>
 
-      <tr><td align="center">
-        <form id='r_hunger game' method='POST' action='/review'>
-        <input type='hidden' name='mid' value='83773'>
-        <input type='hidden' name='title' value='hunger game'>
-        <a href="javascript:{}" onclick="document.getElementById('r_hunger game').submit();">Hunger Game</a>
-        </form>
-      </td></tr>
-
-      <tr><td align="center">
-        <form id='r_avatar' method='POST' action='/review'>
-        <input type='hidden' name='mid' value='87833'>
-        <input type='hidden' name='title' value='avatar'>
-        <a href="javascript:{}" onclick="document.getElementById('r_avatar').submit();">Avatar</a>
-        </form>
-      </td></tr>
+      {% for movie in recom_normal %}
+        <tr><td>
+          <div style="float:left;width:85%">
+            <a href="{{ movie[0] }}">{{ movie[1] }}</a> <br> 
+            ( id:{{ movie[2]}} ) {{ movie[3]|safe }} 
+            <form id='{{ movie[2] }}' method='POST' action='/review'>
+            <input type='hidden' name='mid' value='{{ movie[2] }}}'>
+            <input type='hidden' name='title' value='{{ movie[1] }}'>
+            <a href="javascript:{}" onclick="document.getElementById('{{ movie[2] }}').submit();">review it</a>
+            </form>
+          </div> 
+          <div style="float:left;width:15%">
+            <img src="{{ movie[4] }}" stype="width:100%" >
+          </div>
+        </td></tr>
+      {% endfor %}
 
     </tbody>
   </table>
