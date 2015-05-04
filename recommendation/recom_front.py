@@ -32,7 +32,7 @@ genere_dict = {}
 
 class Application(tornado.web.Application):
   def __init__(self):
-    handlers = [(r"/recom", recomHandler)]
+    handlers = [(r"/recom", recomHandler), (r"/update", updateHandler)]
     tornado.web.Application.__init__(self, handlers)
 
 
@@ -189,7 +189,7 @@ def calCoefficientFromFrequency_dict(freqDict, userPreference, user):
   MaxFreq = len(freqDict[cretic_sortedList[0]]) #the first critics in sortedList is the most frequent one  
   for eachCritic in cretic_sortedList:
     curFre = len(freqDict[eachCritic])
-    if (curFre>=MaxFreq-1):
+    if (curFre>=MaxFreq-3):
       top_cretics.append(eachCritic)
       for (movie, rating, quote) in freqDict[eachCritic]:
         try:
@@ -229,6 +229,21 @@ def calCoefficientFromFrequency_dict(freqDict, userPreference, user):
   # return corrcoef([[80,40,nan,100], [80, 50, 90.7, 100], [10,80, 20, 10]], [80,40,nan,100])
   
 
+class updateHandler(tornado.web.RequestHandler):
+  @gen.coroutine            
+  def get(self):
+    userID = self.get_argument('user', None)
+    userID = str(userID)    
+    movieID = self.get_argument('movieID', None)
+    rating = self.get_argument('rating', None)
+    idx = hash(userID) % len(ports_review)
+    toFetch = "%s/update?user=%s&movieID=%s&rating=%s" %(ports_review[idx],userID, movieID, rating)
+    http_client = AsyncHTTPClient()                                
+    response = yield http_client.fetch(toFetch)            
+    result = json.loads(response.body)      
+    self.write(json.dumps(result))
+    
+
 class recomHandler(tornado.web.RequestHandler):
   @gen.coroutine
   def get(self):
@@ -262,100 +277,104 @@ class recomHandler(tornado.web.RequestHandler):
     # print MovieHistory
     # print ScoreHistory
     
-    # try:
+    try:
       
-    #Fetching to get user info
-    idx = hash(userID) % len(ports_review)
-    if userID in UserBook:        
-      MovieHistory = [movie for (movie, score) in UserBook[userID]]
-      ScoreHistory = [score for (movie, score) in UserBook[userID]]
-    else:    
-      toFetch = "%s/findHistory?user=%s" %(ports_review[idx],userID.replace(" ", "%20"))
-      print "Fetch ReviewServer for findHistory: %s" % toFetch
-      http_client = AsyncHTTPClient()                                
-      response = yield http_client.fetch(toFetch)            
-      mydict = json.loads(response.body)      
-      MovieHistory = [movie for (movie, score) in mydict[userID]]
-      ScoreHistory = [score for (movie, score) in mydict[userID]]
-      print "MovieHistory:%s"%MovieHistory
-      print "ScoreHistory:%s"%ScoreHistory
-    
-    myAllReturn_dict = {}
-    
-    newUserBook=[]
-    for i in range(len(MovieHistory)):
-      newUserBook.append([MovieHistory[i], ScoreHistory[i]])
-
-
-    #Fetching Movie server and collect them all      
-    for eachServer in ports_movie:
-      toFetch = '+'.join(MovieHistory)
-      toFetch = '%s/movie?movieID=%s' % (eachServer,toFetch)
-      print "Fetch MovieServer: %s" % toFetch
+      #Fetching to get user info
+      idx = hash(userID) % len(ports_review)
+      if userID in UserBook:        
+        MovieHistory = [movie for (movie, score) in UserBook[userID]]
+        ScoreHistory = [score for (movie, score) in UserBook[userID]]
+      else:    
+        toFetch = "%s/findHistory?user=%s" %(ports_review[idx],userID.replace(" ", "%20"))
+        print "Fetch ReviewServer for findHistory: %s" % toFetch
+        http_client = AsyncHTTPClient()                                
+        response = yield http_client.fetch(toFetch)            
+        mydict = json.loads(response.body)      
+        MovieHistory = [movie for (movie, score) in mydict[userID]]
+        ScoreHistory = [score for (movie, score) in mydict[userID]]
+        print "MovieHistory:%s"%MovieHistory
+        print "ScoreHistory:%s"%ScoreHistory
       
-      http_client = AsyncHTTPClient()                                
-      response = yield http_client.fetch(toFetch)            
-      tmp_dict = json.loads(response.body)
-      # here to merge all the returned json to myAllReturn_dict
-      myAllReturn_dict = {key: value for (key, value) in (myAllReturn_dict.items() + tmp_dict.items())}
+      myAllReturn_dict = {}
+      
+      newUserBook=[]
+      for i in range(len(MovieHistory)):
+        newUserBook.append([MovieHistory[i], ScoreHistory[i]])
 
-    # print myAllReturn_dict
-          
-    '''
-    myAllReturn_dict.keys()  --> all the moviedIDs that has been rated by this current user
-    myAllReturn_dict[movieID] --> [(critics1,rating1,quote1), (critics2,rating2,quote2)] --> all the historical critics rating in our database
 
-    myFrequency_dict.keys()  --> all the critics
-    myFrequency_dict[critics] --> [(MovieID, Rating, quote), (MovieID, Rating, quote) ... ]
-    '''
-    
-    #From the dict that movieID is the key, to freq dict that critic is the key
-    myFrequency_dict = Return_dict2Frequency_dict (myAllReturn_dict)      
+      #Fetching Movie server and collect them all      
+      for eachServer in ports_movie:
+        toFetch = '+'.join(MovieHistory)
+        toFetch = '%s/movie?movieID=%s' % (eachServer,toFetch)
+        print "Fetch MovieServer: %s" % toFetch
+        
+        http_client = AsyncHTTPClient()                                
+        response = yield http_client.fetch(toFetch)            
+        tmp_dict = json.loads(response.body)
+        # here to merge all the returned json to myAllReturn_dict
+        myAllReturn_dict = {key: value for (key, value) in (myAllReturn_dict.items() + tmp_dict.items())}
 
-    #Goal: Get the best and second best matched cretics, and return the coefficient to the user
-    (top_cretics, coefficient) = calCoefficientFromFrequency_dict(myFrequency_dict, newUserBook, userID)    
-    # (top_cretics, coefficient) = calCoefficientFromFrequency_dict(myFrequency_dict, UserBook[userID], userID)    
-    
+      # print myAllReturn_dict
+            
+      '''
+      myAllReturn_dict.keys()  --> all the moviedIDs that has been rated by this current user
+      myAllReturn_dict[movieID] --> [(critics1,rating1,quote1), (critics2,rating2,quote2)] --> all the historical critics rating in our database
 
-    myReviewReturn_dict = {}
-    for eachServer in ports_review:
-      toFetch = '+'.join(top_cretics).replace(" ", "_")      
-      toFetch = '%s/review?critics=%s' % (eachServer,toFetch)
-      print "Fetch ReviewServer: %s" % toFetch
-      http_client = AsyncHTTPClient()                                
-      response = yield http_client.fetch(toFetch)            
-      tmp_dict = json.loads(response.body)
-      myReviewReturn_dict = {str(key): value for (key, value) in (myReviewReturn_dict.items() + tmp_dict.items())}
-    
-    # print "myReviewReturn_dict:\n%s" % myReviewReturn_dict
-    FinalList = []
-    for i in xrange(len(top_cretics)):
-      try:
-        weighting = coefficient[i]
-        cur_cretics = str(top_cretics[i])
-        # print "type: %s" % type(cur_cretics)
-        # print myReviewReturn_dict[cur_cretics][0]
-        # print "Weighting:\t%s\tcur_cretics:\t%s" % (weighting, cur_cretics)
-        myNewWeightedRating = [(movie, RatingConversion(rating)*weighting) for (movie, rating) in myReviewReturn_dict[cur_cretics]]
-        # print "Orginal Rating:\n%s\nWeighted Rating:\n%s" % (myReviewReturn_dict[cur_cretics][:10], myNewWeightedRating[:10])
-        FinalList.extend(myNewWeightedRating)
-      except:
-        pass
+      myFrequency_dict.keys()  --> all the critics
+      myFrequency_dict[critics] --> [(MovieID, Rating, quote), (MovieID, Rating, quote) ... ]
+      '''
+      
+      #From the dict that movieID is the key, to freq dict that critic is the key
+      myFrequency_dict = Return_dict2Frequency_dict (myAllReturn_dict)      
+
+      #Goal: Get the best and second best matched cretics, and return the coefficient to the user
+      (top_cretics, coefficient) = calCoefficientFromFrequency_dict(myFrequency_dict, newUserBook, userID)    
+      # (top_cretics, coefficient) = calCoefficientFromFrequency_dict(myFrequency_dict, UserBook[userID], userID)    
       
 
-    #Sort tuple list
-    FinalList = sorted(FinalList, key=lambda tup: tup[1], reverse=True)    
-    [toprint, NormalResult, GenreResult] = ToFormat(FinalList[:20], gener)
-    
-    toSuperFront={}
-    toSuperFront['NormalResult'] = NormalResult
-    toSuperFront['GenreResult'] = GenreResult
-    
-    self.write(json.dumps(toSuperFront))
-    # self.write(toprint)
+      myReviewReturn_dict = {}
+      for eachServer in ports_review:
+        toFetch = '+'.join(top_cretics).replace(" ", "_")      
+        toFetch = '%s/review?critics=%s' % (eachServer,toFetch)
+        print "Fetch ReviewServer: %s" % toFetch
+        http_client = AsyncHTTPClient()                                
+        response = yield http_client.fetch(toFetch)            
+        tmp_dict = json.loads(response.body)
+        myReviewReturn_dict = {str(key): value for (key, value) in (myReviewReturn_dict.items() + tmp_dict.items())}
+      
+      # print "myReviewReturn_dict:\n%s" % myReviewReturn_dict
+      FinalList = []
+      for i in xrange(len(top_cretics)):
+        try:
+          weighting = coefficient[i]
+          cur_cretics = str(top_cretics[i])
+          # print "type: %s" % type(cur_cretics)
+          # print myReviewReturn_dict[cur_cretics][0]
+          # print "Weighting:\t%s\tcur_cretics:\t%s" % (weighting, cur_cretics)
+          myNewWeightedRating = [(movie, RatingConversion(rating)*weighting) for (movie, rating) in myReviewReturn_dict[cur_cretics]]
+          # print "Orginal Rating:\n%s\nWeighted Rating:\n%s" % (myReviewReturn_dict[cur_cretics][:10], myNewWeightedRating[:10])
+          FinalList.extend(myNewWeightedRating)
+        except:
+          pass
+        
 
-    # except:
-    #   self.write("User<strong> %s </strong>does not have review history in system" % userID)
+      #Sort tuple list
+      FinalList = sorted(FinalList, key=lambda tup: tup[1], reverse=True)    
+      [toprint, NormalResult, GenreResult] = ToFormat(FinalList[:20], gener)
+      
+      toSuperFront={}
+      toSuperFront['NormalResult'] = NormalResult
+      toSuperFront['GenreResult'] = GenreResult
+      
+      self.write(json.dumps(toSuperFront))
+      # self.write(toprint)
+
+    except:
+      toSuperFront={}
+      toSuperFront['NormalResult'] = []
+      toSuperFront['GenreResult'] = []
+      self.write(json.dumps(toSuperFront))
+    
     # self.write("Hi User: %s <br>%s" % (userID, UserBook[userID]))
     
 
