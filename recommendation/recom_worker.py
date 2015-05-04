@@ -32,6 +32,16 @@ myback_movie = recom_worker.RecommApp('MovieServer', num, port)
 myback_movie.app
 '''
 
+def remove_duplicates(values):
+  output = []
+  seen = set()
+  for value in values:
+    # If value has not been encountered yet,
+    # ... add it to both list and set.
+    if value not in seen:
+      output.append(value)
+      seen.add(value)
+  return output
 
 class Application(tornado.web.Application):
     def __init__(self, server):
@@ -57,6 +67,9 @@ class updateHandler(tornado.web.RequestHandler):
       invertedIndex[userID] = [(movieID, rating)]
     
     print "invertedIndex[userID] in updateHandler:%s"%invertedIndex[userID]
+    res = {"status": "success"}
+    self.write(json.dumps(res))
+    
 
 
 class findHistoryHandler(tornado.web.RequestHandler):
@@ -83,6 +96,7 @@ class movieHandler(tornado.web.RequestHandler):
     global invertedIndex, tokenizer
     movieIDs = self.get_argument('movieID', None)
     MovieList = [str(t) for t in tokenizer.tokenize(movieIDs)] 
+    MovieList = remove_duplicates(MovieList)
     # print "movieIDs" + str(MovieList)        
     
     result = {}
